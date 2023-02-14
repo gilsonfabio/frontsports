@@ -3,6 +3,7 @@ import api from "../api/api";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import Menubar from "../../components/Menubar";
+import moment from 'moment';
 
 interface atletasProps {
   atlId: number;
@@ -123,7 +124,7 @@ const MosDetEquipes = () => {
                   return <div key={idx} className="bg-[#d7dddc]/20 rounded overflow-hidden shadow-lg mb-1 hover:bg-[#b5b9b9]/40" > 
                       <div className="flex flex-row items-start justify-between px-2">
                         <div className="flex flex-col items-start px-2 py-1 ">
-                          <div className="text-[15px] text-green-500 font-bold mb-0">{idx}</div>
+                          <div className="text-[15px] text-green-500 font-bold mb-0">{idx + 1}</div>
                         </div>
                       </div>
                       <div className="flex flex-row items-start justify-between px-2 py-0 ">
@@ -133,7 +134,7 @@ const MosDetEquipes = () => {
                         </div>
                         <div className="flex flex-col items-start px-2 py-1">
                           <span className='text-[12px] font-bold'>Nascimento</span>
-                          <div className="text-[12px] mb-0">{item.atlNascimento}</div>
+                          <div className="text-[12px] mb-0">{moment(item.atlNascimento).format('DD-MM-YYYY')}</div>
                         </div>
                       </div>                                
                       <div className="flex flex-row items-start justify-between px-2">

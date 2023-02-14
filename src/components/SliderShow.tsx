@@ -53,7 +53,7 @@ const Slideshow = () => {
 						    src={each}
 					    />
 						<span className="font-serif flex flex-auto absolute text-white text-4xl md:text-6xl mt-28 md:ml-32 items-center p-2 md:items-start justify-start">
-							SECRETÁRIA DE ESPORTE, 
+							SECRETARIA DE ESPORTE, 
 						</span>
 						<span className="font-serif flex flex-auto absolute text-white text-4xl md:text-6xl mt-56 md:mt-48 md:ml-32 items-center p-2 md:items-start justify-start">
 							LAZER E JUVENTUDE

@@ -55,7 +55,7 @@ const AdmEquipes = () => {
                     <div className="mb-32 h-auto">
                         <div className="flex flex-row justify-between items-center ">
                             <span className="w-full flex flex-row justify-center items-center text-3xl font-bold text-green-600 mt-6 mb-6" >
-                                Eventos
+                                Equipes
                             </span>                
                         </div>
                         <div className="p-2 grid grid-cols-1 gap-1">  

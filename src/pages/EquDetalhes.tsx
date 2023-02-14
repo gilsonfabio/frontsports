@@ -34,6 +34,8 @@ const EquDetalhes = () => {
     const router = useRouter();
     const [idEqu, setIdEquipe] = useState(router.query.id);
     const [nomEquipe, setNomEquipe] = useState('');
+    const [qtdAtletas, setQtdAtletas] = useState('');
+    const [limAtletas, setLimAtletas] = useState('');
     
     const {query: { id }, } = router
 
@@ -44,6 +46,8 @@ const EquDetalhes = () => {
         api.get(`/dadEquipe/${idEqu}`).then(response => {
             setEquipe(response.data);
             setNomEquipe(response.data[0].equDescricao);
+            setQtdAtletas(response.data[0].qtd);
+            setLimAtletas(response.data[0].eveNroEquipes);
             console.log(response.data)
         })
 
@@ -110,6 +114,12 @@ const EquDetalhes = () => {
                     <div className="text-black font-bold">{row.eveDescricao}</div>
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className="">
+                    <span className='text-gray-500'>Qtde Atletas:</span>
+                    <div className="text-black font-bold">{row.qtd} / {row.eveNroEquipes}</div>
+                  </div>                  
+                </div>
                 <div className="">
                   <Link href={`/FicEquipe/${row.equId}`} passHref>
                     <div className="text-[15px] text-green-500 font-bold mb-0 hover:cursor-pointer">emite ficha</div>
@@ -121,11 +131,13 @@ const EquDetalhes = () => {
               <span className="text-[14px] md:text-3xl font-bold text-green-600 mt-6 mb-6 " >
                 Atletas
               </span>
-              <Link href={`/CadAtleta/${idEqu}`} passHref > 
-                <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-xs md:text-sx border bottom-1 border-green-600 rounded-full w-28 h-8 md:w-40 md:h-10">
-                  Adicionar Atleta
-                </a>  
-              </Link>
+              <div className={ qtdAtletas == limAtletas ? "hidden" : "text-green-500" }>
+                <Link href={`/CadAtleta/${idEqu}`} passHref > 
+                  <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-xs md:text-sx border bottom-1 border-green-600 rounded-full w-28 h-8 md:w-40 md:h-10">
+                    Adicionar Atleta
+                  </a>  
+                </Link>
+              </div>  
             </div> 
             <div className='flex flex-col w-full h-full bg-white text-black mt-5'>
               <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 ml-1 px-0 py-0 ">            
@@ -133,7 +145,7 @@ const EquDetalhes = () => {
                   return <div key={idx} className="bg-[#d7dddc]/20 rounded overflow-hidden shadow-lg mb-1 hover:bg-[#b5b9b9]/40" > 
                       <div className="flex flex-row items-start justify-between px-2">
                         <div className="flex flex-col items-start px-2 py-1 ">
-                          <div className="text-[15px] text-green-500 font-bold mb-0">{idx}</div>
+                          <div className="text-[15px] text-green-500 font-bold mb-0">{idx+1}</div>
                         </div>
                       </div>
                       <div className="flex flex-row items-start justify-between px-2 py-0 ">

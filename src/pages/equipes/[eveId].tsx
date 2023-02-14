@@ -1,37 +1,54 @@
 import React, { useState, useEffect } from "react";
 import api from "../api/api";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import Menubar from "../../components/Menubar";
+import moment from "moment";
 
 interface eventosProps {
     equId: number;
     equDescricao: string;
 }
-
 const Equipes = () => {
     const [equipes, setEquipes] = useState<Array<eventosProps>>([]);
     const router = useRouter();
     const [idEve, setIdEvento] = useState(router.query.eveId);
     const [evento, setEvento] = useState([]);
     const [desEvento, setDesEvento] = useState('');
-    const {query: { eveId }, } = router
+    const [datLimite, setDatLimite] = useState();
+
+    const {query: { eveId }, } = router;
 
     useEffect(() => {    
-    
         setIdEvento(eveId);
-  
         api.get(`/equEvento/${idEve}`).then(response => {
             setEquipes(response.data);
         })   
-
         api.get(`/dadEvento/${idEve}`).then(resp => {
           setEvento(resp.data);
-          setDesEvento(resp.data[0].eveDescricao);            
+          setDesEvento(resp.data[0].eveDescricao);
+          setDatLimite(resp.data[0].eveDatFinal);            
         })   
-
     }, [])
 
+    function verifDatLimite(){
+      let datWork = new Date() as any;
+      let datAtual = moment(datWork).format('MMMM Do YYYY, h:mm:ss a') as any;
+      let datLim = moment(datLimite).format('MMMM Do YYYY, h:mm:ss a');
+      console.log(datAtual)
+      console.log(datLim)
+      try {
+        if(moment(datAtual).isAfter(datLim)) {
+          alert(`Data atual é superior a data limite para inscrição de equipes. ${eveId}`);        
+        }else {
+          Router.push({
+            pathname: `/SignEquipe/:${eveId}`,
+          })
+        }
+      }catch (err) {
+          alert(`Falha no login técnico! Tente novamente. ${eveId}`);
+        }             
+    }
 
     return (
       <div className="w-screen h-screen bg-white">
@@ -41,11 +58,11 @@ const Equipes = () => {
           <span className="text-[10px] md:text-2xl font-bold text-green-600 mt-6 h-10" >
             Equipes do Evento: {desEvento}
           </span>
-          <Link href={`/SignEquipe/${eveId}`} > 
+          <button onClick={verifDatLimite} > 
             <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-[10px] md:text-[14px] border bottom-1 border-green-600 rounded-full w-24 h-10 md:w-40 md:h-10">
               Adicionar Equipe
             </a>  
-          </Link>
+          </button>
         </div>  
             <div className='flex flex-col w-full h-full text-black mt-5'>
               <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 ml-1 px-0 py-0 ">            

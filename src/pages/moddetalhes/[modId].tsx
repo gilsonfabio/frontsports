@@ -3,6 +3,7 @@ import api from "../api/api";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Menubar from "../../components/Menubar";
+import moment from 'moment';
 
 interface eventosProps {
     eveId: number;
@@ -62,11 +63,11 @@ const ModDetalhes = () => {
                       <div className="flex flex-row items-start justify-between px-2 py-0 ">
                         <div className="flex flex-col items-start px-2 py-1">
                           <span className='text-[12px] font-bold'>Dt. Inicial</span>
-                          <div className="text-[12px] mb-0">{item.eveDatInicial}</div>
+                          <div className="text-[12px] mb-0">{moment(item.eveDatInicial).format('DD-MM-YYYY')}</div>
                         </div>
                         <div className="flex flex-col items-start px-2 py-1">
                           <span className='text-[12px] font-bold'>Dt. Final</span>
-                          <div className="text-[12px] mb-0">{item.eveDatFinal}</div>
+                          <div className="text-[12px] mb-0">{moment(item.eveDatFinal).format('DD-MM-YYYY')}</div>
                         </div>
                       </div>                                
                       <div className="flex flex-row items-start justify-between px-2">
