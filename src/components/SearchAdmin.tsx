@@ -48,7 +48,7 @@ const SearchAdmin = ({idAdm, nivel}: any) => {
             <div className="text-black ">
                 <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 mb-5 ml-1 px-0 py-0 ">            
                     {admin.map((item:any, idx) => {
-                        return <button onClick={() => handleDetalhes(item)}  
+                        return <button key={idx} onClick={() => handleDetalhes(item)}  
                             className="bg-[#d7dddc]/20 rounded overflow-hidden shadow-lg mb-1 hover:bg-[#b5b9b9]/40" > 
                                 <div className="flex flex-row items-start justify-between px-2 ">
                                     <div className="flex flex-col items-start px-2 py-2">
