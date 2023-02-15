@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import api from "../pages/api/api";
 import Link from "next/link";
+import Router, { useRouter } from "next/router";
 
 interface adminProps {
+    usrId:number;
     usrNome: string; 
     usrEmail: string; 
     usrPassword: string;
@@ -12,7 +14,7 @@ interface adminProps {
     usrStatus: string;
 }
 
-const SearchAdmin = () => {
+const SearchAdmin = ({idAdm, nivel}: any) => {
     const [admin, setAdmin] = useState<Array<adminProps>>([]);
     
     useEffect(() => {   
@@ -20,6 +22,16 @@ const SearchAdmin = () => {
             setAdmin(response.data);            
         })    
     }, [])
+
+    function handleDetalhes(item):any {
+        let usuario = item.usrId;
+        Router.push({
+          pathname: '/UsrDetalhes',
+          query: { id: `${idAdm}`, nivAce: `${nivel}`, usrId: `${usuario}`}        
+        })        
+      }
+
+    //href={`/UsrDetalhes/${item.usrId}/${idAdm}/${nivel}`}
 
     return (
         <div className="mb-32 h-auto">
@@ -36,8 +48,8 @@ const SearchAdmin = () => {
             <div className="text-black ">
                 <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 mb-5 ml-1 px-0 py-0 ">            
                     {admin.map((item:any, idx) => {
-                        return <Link key={idx} href={`/AltTecnico/${item.usrId}`}>
-                            <a className="bg-[#d7dddc]/20 rounded overflow-hidden shadow-lg mb-1 hover:bg-[#b5b9b9]/40" > 
+                        return <button onClick={() => handleDetalhes(item)}  
+                            className="bg-[#d7dddc]/20 rounded overflow-hidden shadow-lg mb-1 hover:bg-[#b5b9b9]/40" > 
                                 <div className="flex flex-row items-start justify-between px-2 ">
                                     <div className="flex flex-col items-start px-2 py-2">
                                         <span className='text-[12px] font-bold'>Nome</span>
@@ -64,8 +76,7 @@ const SearchAdmin = () => {
                                         <div className="text-[12px] mb-0">{item.usrCpf}</div>
                                     </div>
                                 </div>                                
-                            </a>                            
-                        </Link>                  
+                            </button>                  
                     })}
                 </div>
             </div>         

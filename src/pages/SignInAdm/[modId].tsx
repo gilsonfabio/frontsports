@@ -12,9 +12,10 @@ const SignInAdm = () => {
     const {query: { modId }, } = router
 
     async function sendLogin(e:any){
+        let modId = router.query.modId;
         e.preventDefault();
         try {
-          const response = await api.get(`signIn/${email}/${password}`);
+          const response = await api.get(`loginAdm/${email}/${password}/${modId}`);
           let idUsuario = response.data.usrId;
           let nomUsuario = response.data.usrNome;
           Router.push({

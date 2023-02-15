@@ -2,46 +2,79 @@ import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
 
-import api from './api/api';
+import api from '../api/api';
 
-const CadAdmin = () => {
+interface atletaProps {
+    atlId: number;
+    atlNome: string;
+    atlNascimento: string;
+    atlCpf: string;
+    atlIdentidade: string;
+    atlOrgEmissor: string;
+    atlNatural: string;
+    atlEstCivil: string;
+    atlNomPai: string;
+    atlNomMae: string;
+    atlEndereco: string;
+    atlIdEquipe: number;
+}
+
+const AltAdmin = () => {
     const router = useRouter();
 
-    const [nome, setTecNome] = useState(''); 
-    const [email, setTecEmail] = useState('');
-    const [password, setTecPassword] = useState('');
-    const [celular, setTecCelular] = useState('');
-    const [cpf, setTecCpf] = useState('');
-    const [nascimento, setTecNascimento] = useState('');
-    const [nivAcesso, setNivAcesso] = useState('');
+    const [usuario, setUsuario] = useState([]);
+    const [usrNome, setNome] = useState(''); 
+    const [usrEmail, setEmail] = useState('');
+    const [usrPassword, setPassword] = useState('');
+    const [usrCelular, setCelular] = useState('');
+    const [usrCpf, setCpf] = useState('');
+    const [usrNascimento, setNascimento] = useState('');
+    const [usrNivAcesso, setNivAcesso] = useState('');
+    const [idUsr, setIdUsuario] = useState(router.query.usrId);
+    
+    const {query: { usrId }, } = router;
 
-     const {query: { id }, } = router;
+    useEffect(() => {    
+    
+        setIdUsuario(usrId);
+  
+        api.get(`/dadUsuario/${idUsr}`).then(response => {
+          setUsuario(response.data);
+          setNome(response.data[0].usrNome); 
+          setNascimento(response.data[0].usrNascimento); 
+          setCpf(response.data[0].usrCpf); 
+          setNivAcesso(response.data[0].usrNivAcesso); 
+          setCelular(response.data[0].usrCelular);
+          setEmail(response.data[0].usrEmail);  
+        })            
+    }, [])
 
-    async function handleCadastra(e:any){      
+    async function handleAlteracao(e:any){      
         e.preventDefault();
 
+        setIdUsuario(usrId);
+
         try {
-            api.post('newuser', {
-                nome, 
-                cpf, 
-                nascimento, 
-                email, 
-                celular, 
-                password,
-                nivAcesso
+            api.put(`updUsuario/${idUsr}`, {
+                usrNome, 
+                usrNascimento, 
+                usrCpf, 
+                usrCelular,
+                usrEmail,
+                usrNivAcesso
             }).then(() => {
-                alert('Administrador(a) cadastrado com sucesso!')
+                alert('Usuário alterado com sucesso!')
             }).catch(() => {
-                alert('Erro no cadastro!');
+                alert('Erro na alteração!');
             })  
             Router.back();
         }catch (err) {
-            alert('Falha no Cadastro de Administrador(a)!');
+            alert('Falha na alteração do usuário!');
         }  
     }
-
+      
     return (
-    <section className='flex items-center justify-center h-screen gradient-form bg-gray-200 md:h-screen'>
+    <section className='flex justify-center items-center h-screen gradient-form bg-gray-200 md:h-screen'>
       <div className='container py-12 px-6 h-full'>
         <div className=' flex justify-center items-center flex-wrap h-full g-6 text-gray-800'>
           <div className=''>
@@ -51,7 +84,7 @@ const CadAdmin = () => {
                   <div className='md:p-12 md:mx-6'>
                     <div className='text-center'>
                       <h4 className='text-xl font-semibold mt-1 mb-12 pb-1'>
-                        Formulário de Cadastro de Administrador(a)
+                        Formulário Alteração de Usuário
                       </h4>
                     </div>
                     <form>                       
@@ -61,8 +94,8 @@ const CadAdmin = () => {
                           className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                           placeholder='Informe nome do técnico'
                           name='nome'
-                          value={nome} 
-                          onChange={(e) => {setTecNome(e.target.value)}} 
+                          value={usrNome} 
+                          onChange={(e) => {setNome(e.target.value)}} 
                         />
                       </div>
                       <div className='grid grid-cols-2 gap-2'>   
@@ -72,8 +105,8 @@ const CadAdmin = () => {
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe email'
                             name='email'
-                            value={email} 
-                            onChange={(e) => {setTecEmail(e.target.value)}} 
+                            value={usrEmail} 
+                            onChange={(e) => {setEmail(e.target.value)}} 
                           />
                         </div>
                         <div className='mb-4'>
@@ -82,8 +115,8 @@ const CadAdmin = () => {
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe celular'
                             name='celular'
-                            value={celular} 
-                            onChange={(e) => {setTecCelular(e.target.value)}} 
+                            value={usrCelular} 
+                            onChange={(e) => {setCelular(e.target.value)}} 
                           />
                         </div>
                       </div>
@@ -94,8 +127,8 @@ const CadAdmin = () => {
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Cpf'
                             name='cpf'
-                            value={cpf} 
-                            onChange={(e) => {setTecCpf(e.target.value)}} 
+                            value={usrCpf} 
+                            onChange={(e) => {setCpf(e.target.value)}} 
                           />
                         </div>
                         <div className='mb-4'>
@@ -104,40 +137,30 @@ const CadAdmin = () => {
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Nascimento'
                             name='nascimento'
-                            value={nascimento} 
-                            onChange={(e) => {setTecNascimento(e.target.value)}} 
+                            value={usrNascimento} 
+                            onChange={(e) => {setNascimento(e.target.value)}} 
                           />
-                        </div>
-                        <div className='mb-4'>
-                          <input
-                            type='password'
-                            className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-                            placeholder='Informe Senha'
-                            name='password'
-                            value={password} 
-                            onChange={(e) => {setTecPassword(e.target.value)}} 
-                          />
-                        </div>
+                        </div>                        
                         <div className='mb-4'>
                           <input
                             type='number'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Nivel Acesso'
                             name='nivAcesso'
-                            value={nivAcesso} 
+                            value={usrNivAcesso} 
                             onChange={(e) => {setNivAcesso(e.target.value)}} 
                           />
                         </div>
-                      </div>                                         
+                      </div>                            
                       <div className='text-center pt-1 mb-12 pb-1'>
                         <button
                           className='bg-green inline-block px-6 py-2.5 text-black hover:text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg transition duration-150 ease-in-out w-full mb-3'
                           type='button'
-                          onClick={handleCadastra}
+                          onClick={handleAlteracao}
                         >
-                          Cadastra
+                          Alterar
                         </button>
-                      </div>                      
+                      </div>                     
                     </form>
                   </div>
                 </div>
@@ -149,4 +172,4 @@ const CadAdmin = () => {
     </section>
     );
 };
-export default CadAdmin;
+export default AltAdmin;

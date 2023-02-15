@@ -8,14 +8,16 @@ interface eventosProps {
     eveDescricao: string;
 }
 
-const SearchEventos = () => {
+const SearchEventos = ({usrId, nivel}: any) => {
     const [eventos, setEventos] = useState<Array<eventosProps>>([]);
-    
-    useEffect(() => {   
+    const [idUsr, setIdUsuario] = useState(usrId);
+    const [nivAcesso, setNivAcesso] = useState(nivel);
+    const [nivLiberado, setNivLiberado] = useState('9');
+
+    useEffect(() => {  
         api.get(`/eventos`).then(response => {
             setEventos(response.data);
-            
-        })    
+        })            
     }, [])
 
     return (
@@ -24,11 +26,13 @@ const SearchEventos = () => {
                 <span className="flex flex-row justify-center items-center text-3xl font-bold text-green-600 mt-6 mb-6" >
                     Eventos
                 </span>
-                <Link href={`/NewEvento`} > 
-                    <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-[10px] md:text-[14px] border bottom-1 border-green-600 rounded-full w-24 h-10 md:w-40 md:h-10">
-                        + Eventos
-                    </a>  
-                </Link>
+                <div className={ nivAcesso == nivLiberado ? "text-green-500" : "hidden" }>
+                    <Link href={`/NewEvento`} > 
+                        <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-[10px] md:text-[14px] border bottom-1 border-green-600 rounded-full w-24 h-10 md:w-40 md:h-10">
+                            + Eventos
+                        </a>  
+                    </Link>
+                </div>
             </div>
             <div className="text-black ">
                 <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 mb-5 ml-1 px-0 py-0 ">            

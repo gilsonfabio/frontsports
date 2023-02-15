@@ -16,17 +16,19 @@ const SignUpForm = () => {
         if(email == admEmail && password == admPassword ) {
           let idUsuario = 999999;
           let nomUsuario = 'Administrador';
+          let nivAcesso = 9;
           Router.push({
             pathname: '/Dashboard',
-              query: { id: `${idUsuario}`, name: `${nomUsuario}`}
+              query: { id: `${idUsuario}`, name: `${nomUsuario}`, nivAce: `${nivAcesso}`}
             })
         }else {
           const response = await api.get(`signIn/${email}/${password}`);
           let idUsuario = response.data.usrId;
           let nomUsuario = response.data.usrNome;
+          let nivAcesso = response.data.usrNivAcesso;
           Router.push({
             pathname: '/Dashboard',
-              query: { id: `${idUsuario}`, name: `${nomUsuario}`}
+              query: { id: `${idUsuario}`, name: `${nomUsuario}`, nivAce: `${nivAcesso}`}
             })
         }    
       } catch (err) {
