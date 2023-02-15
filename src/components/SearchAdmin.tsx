@@ -23,7 +23,7 @@ const SearchAdmin = ({idAdm, nivel}: any) => {
         })    
     }, [])
 
-    function handleDetalhes(item):any {
+    function handleDetalhes(item:any) {
         let usuario = item.usrId;
         Router.push({
           pathname: '/UsrDetalhes',
