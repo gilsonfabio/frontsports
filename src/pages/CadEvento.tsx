@@ -21,14 +21,20 @@ const CadEvento = () => {
         e.preventDefault();
 
         setModalidade(id);
-
+        let datInicio = eveDatInicial.substring(6,10) + '-' + eveDatInicial.substring(3,5) + '-' + eveDatInicial.substring(0,2);
+        setDatInicial(datInicio);
+        console.log('Data Inicio:', datInicio);
+        
+        let datFinal = eveDatFinal.substring(6,10) + '-' + eveDatFinal.substring(3,5) + '-' + eveDatFinal.substring(0,2);
+        setDatFinal(datFinal);
+        console.log('Data Final:', datFinal);
         try {
             api.post('newevento', {
                 eveModalidade, 
                 eveDescricao, 
                 eveAno, 
-                eveDatInicial, 
-                eveDatFinal, 
+                eveDatInicial: datInicio, 
+                eveDatFinal: datFinal, 
                 eveNroEquipes, 
                 eveGenero, 
             }).then(() => {
@@ -80,7 +86,7 @@ const CadEvento = () => {
                         </div>
                         <div className='mb-4'>
                           <input
-                            type='date'
+                            type='text'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Data Inicial'
                             name='datInicial'
@@ -92,7 +98,7 @@ const CadEvento = () => {
                       <div className='grid grid-cols-2 gap-2'> 
                         <div className='mb-4'>
                           <input
-                            type='date'
+                            type='text'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Data Final'
                             name='datFinal'

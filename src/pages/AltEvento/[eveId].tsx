@@ -140,10 +140,10 @@ const AltEvento = () => {
                       </div>
                       <div className='grid grid-cols-2 gap-2'> 
                         <div>
-                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. inicial atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
+                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. inicial atual:{Intl.DateTimeFormat('pt-BR', {timeZone: 'UTC'}).format(Date.parse(eveDatInicial))}</span>
                         </div>
                         <div>
-                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. final atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
+                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. final atual:{Intl.DateTimeFormat('pt-BR', {timeZone: 'UTC'}).format(Date.parse(eveDatFinal))}</span>
                         </div>
                       </div>
                       <div className='grid grid-cols-2 gap-2'> 
