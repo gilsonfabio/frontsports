@@ -63,11 +63,11 @@ const AltEvento = () => {
     async function handleAlterar(e:any){      
         e.preventDefault();
         
-        let datInicio = eveDatInicial.substring(7,10) + '-' + eveDatInicial.substring(4,5) + '-' + eveDatInicial.substring(1,2);
+        let datInicio = eveDatInicial.substring(6,10) + '-' + eveDatInicial.substring(3,5) + '-' + eveDatInicial.substring(0,2);
         setEveDatInicial(datInicio);
         console.log('Data Inicio:', datInicio);
         
-        let datFinal = eveDatFinal.substring(7,10) + '-' + eveDatFinal.substring(4,5) + '-' + eveDatFinal.substring(1,2);
+        let datFinal = eveDatFinal.substring(6,10) + '-' + eveDatFinal.substring(3,5) + '-' + eveDatFinal.substring(0,2);
         setEveDatFinal(datFinal);
         console.log('Data Final:', datFinal);
         
