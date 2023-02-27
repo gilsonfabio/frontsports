@@ -1,23 +1,23 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
-import { GetServerSideProps } from 'next';
+//import { GetServerSideProps } from 'next';
 
 import api from './api/api';
 
-interface apiProps {
-  modalidades: any;
-}
+//interface apiProps {
+//  modalidades: any;
+//}
 
 interface modalidadesProps {
   modId: number;
   modDescricao: string;
 }
 
-const CadEvento = ({modalidades}:apiProps) => {
+const CadEvento = () => {
     const router = useRouter();
 
-    //const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
+    const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
     const [eveModalidade, setIdModalidade] = useState(''); 
     const [eveDescricao, setDescricao] = useState('');
     const [eveAno, setAno] = useState('');
@@ -27,9 +27,9 @@ const CadEvento = ({modalidades}:apiProps) => {
     const [eveGenero, setGenero] = useState('');
 
     useEffect(() => {    
-      //api.get(`/modalidades`).then(response => {
-      //  setModalidades(response.data);
-      //})       
+      api.get(`/modalidades`).then(response => {
+        setModalidades(response.data);
+      })       
     }, [])
 
     async function handleCadastra(e:any){      
@@ -70,17 +70,17 @@ const CadEvento = ({modalidades}:apiProps) => {
                       </h4>
                     </div>
                     <form>                       
-                      <div className='grid grid-cols-2 gap-2'>   
-                        <div className='mb-4'>
-                          <input
-                            type='text'
-                            className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-                            placeholder='Informe Descrição Evento'
-                            name='eveDescricao'
-                            value={eveDescricao} 
-                            onChange={(e) => {setDescricao(e.target.value)}} 
-                          />
-                        </div>
+                      <div className='mb-4'>
+                        <input
+                          type='text'
+                          className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
+                          placeholder='Informe Descrição Evento'
+                          name='eveDescricao'
+                          value={eveDescricao} 
+                          onChange={(e) => {setDescricao(e.target.value)}} 
+                        />
+                      </div>
+                      <div className='grid grid-cols-2 gap-2'>                         
                         <div className='mb-4'>
                           <input
                             type='text'
@@ -89,6 +89,16 @@ const CadEvento = ({modalidades}:apiProps) => {
                             name='ano'
                             value={eveAno} 
                             onChange={(e) => {setAno(e.target.value)}} 
+                          />
+                        </div>
+                        <div className='mb-4'>
+                          <input
+                            type='text'
+                            className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
+                            placeholder='Informe Nro Equipes'
+                            name='nroEquipes'
+                            value={eveNroEquipes} 
+                            onChange={(e) => {setNroEquipes(e.target.value)}} 
                           />
                         </div>
                       </div>
@@ -113,17 +123,7 @@ const CadEvento = ({modalidades}:apiProps) => {
                             onChange={(e) => {setDatFinal(e.target.value)}} 
                           />
                         </div>
-                      </div>
-                      <div className='mb-4'>
-                        <input
-                          type='text'
-                          className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-                          placeholder='Informe Nro Equipes'
-                          name='nroEquipes'
-                          value={eveNroEquipes} 
-                          onChange={(e) => {setNroEquipes(e.target.value)}} 
-                        />
-                      </div>
+                      </div>                      
                       <div className='mb-4'>
                         <select className="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example" 
                           value={eveGenero}
@@ -167,7 +167,7 @@ const CadEvento = ({modalidades}:apiProps) => {
     );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+/*export const getServerSideProps: GetServerSideProps = async () => {
   let urlModalidades = "https://backsports.herokuapp.com/modalidades";
   const resModalidades = await fetch(urlModalidades);
   const dataModalidades = await resModalidades.json()
@@ -178,5 +178,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
      } 
   }
 }
+*/
 
 export default CadEvento;

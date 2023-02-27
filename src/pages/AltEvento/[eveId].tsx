@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
+import moment from "moment";
 
 import api from '../api/api';
 
@@ -120,6 +121,21 @@ const AltEvento = () => {
                         </div>
                         <div className='mb-4'>
                           <input
+                            type='text'
+                            className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
+                            placeholder='Informe Nro de Equipes'
+                            name='nroEquipes'
+                            value={eveNroEquipes} 
+                            onChange={(e) => {setEveNroEquipes(e.target.value)}} 
+                          />                                              
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-2'> 
+                        <div>
+                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. inicial atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
+                        </div>
+                        <div className='mb-4'>
+                          <input
                             type='date'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Data Inicial'
@@ -128,27 +144,20 @@ const AltEvento = () => {
                             onChange={(e) => {setEveDatInicial(e.target.value)}} 
                           />
                         </div>
-                      </div>
-                      <div className='mb-4'>
-                        <input
-                          type='date'
-                          className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-                          placeholder='Informe Data Final'
-                          name='datFinal'
-                          value={eveDatFinal} 
-                          onChange={(e) => {setEveDatFinal(e.target.value)}} 
-                        />                                              
-                      </div>  
-                      <div className='mb-4'>
-                        <input
-                          type='text'
-                          className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-                          placeholder='Informe Nro de Equipes'
-                          name='nroEquipes'
-                          value={eveNroEquipes} 
-                          onChange={(e) => {setEveNroEquipes(e.target.value)}} 
-                        />                                              
-                      </div>
+                        <div>
+                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. final atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
+                        </div>
+                        <div className='mb-4'>
+                          <input
+                            type='date'
+                            className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
+                            placeholder='Informe Data Final'
+                            name='datFinal'
+                            value={eveDatFinal} 
+                            onChange={(e) => {setEveDatFinal(e.target.value)}} 
+                          />                                              
+                        </div>
+                      </div>                     
                       <div className='mb-4'>
                         <input
                           type='text'
