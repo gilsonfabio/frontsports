@@ -62,14 +62,8 @@ const AltEvento = () => {
 
     async function handleAlterar(e:any){      
         e.preventDefault();
-        
         let datInicio = eveDatInicial.substring(6,10) + '-' + eveDatInicial.substring(3,5) + '-' + eveDatInicial.substring(0,2);
-        setEveDatInicial(datInicio);
-        console.log('Data Inicio:', datInicio);
-        
         let datFinal = eveDatFinal.substring(6,10) + '-' + eveDatFinal.substring(3,5) + '-' + eveDatFinal.substring(0,2);
-        setEveDatFinal(datFinal);
-        console.log('Data Final:', datFinal);
         
         try {
           api.put(`updEvento/${idEve}`, {
