@@ -5,7 +5,6 @@ import Menubar from '../components/Menubar';
 import SearchModalidades from '../components/SearchModalidades';
 import Router, { useRouter } from "next/router";
 
-
 const AdmModalidades = () => {
   const router = useRouter();
   const [idUsr, setIdUsuario] = useState(router.query.id);

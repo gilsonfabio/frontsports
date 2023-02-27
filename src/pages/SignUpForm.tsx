@@ -23,7 +23,6 @@ const SignUpForm = () => {
             })
         }else {
           const response = await api.get(`signIn/${email}/${password}`);
-          localStorage.setItem('tokenJWT', response.data.token);
           let idUsuario = response.data.user.usrId;
           let nomUsuario = response.data.user.usrNome;
           let nivAcesso = response.data.user.usrNivAcesso;
