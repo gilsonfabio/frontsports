@@ -1,18 +1,23 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
+import { GetServerSideProps } from 'next';
 
 import api from './api/api';
+
+interface apiProps {
+  modalidades: any;
+}
 
 interface modalidadesProps {
   modId: number;
   modDescricao: string;
 }
 
-const CadEvento = () => {
+const CadEvento = ({modalidades}:apiProps) => {
     const router = useRouter();
 
-    const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
+    //const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
     const [eveModalidade, setIdModalidade] = useState(''); 
     const [eveDescricao, setDescricao] = useState('');
     const [eveAno, setAno] = useState('');
@@ -22,9 +27,9 @@ const CadEvento = () => {
     const [eveGenero, setGenero] = useState('');
 
     useEffect(() => {    
-      api.get(`/modalidades`).then(response => {
-        setModalidades(response.data);
-      })       
+      //api.get(`/modalidades`).then(response => {
+      //  setModalidades(response.data);
+      //})       
     }, [])
 
     async function handleCadastra(e:any){      
@@ -136,7 +141,7 @@ const CadEvento = () => {
                           onChange={(e) => {setIdModalidade(e.target.value)}} 
                         >
                           <option selected>Selecione a Modalidade desejada</option>
-                          {modalidades.map((row) => (
+                          {modalidades.map((row:any) => (
                             <option key={row.modId} value={row.modId}>{row.modDescricao}</option>
                           ))}                          
                         </select>             
@@ -161,4 +166,17 @@ const CadEvento = () => {
     </section>
     );
 };
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  let urlModalidades = api + "/modalidades";
+  const resModalidades = await fetch(urlModalidades);
+  const dataModalidades = await resModalidades.json()
+
+  return {
+     props: {
+      modalidades: dataModalidades,
+     } 
+  }
+}
+
 export default CadEvento;

@@ -55,12 +55,6 @@ const AltAdmin = () => {
         e.preventDefault();
 
         setIdUsuario(usrId);
-        console.log('data antes',nasc);
-
-        let datNasc = nasc.substring(6,10) + '-' + nasc.substring(3,5) + '-' + nasc.substring(0,2);
-        
-        setNascimento(datNasc); 
-        
         console.log('data após',usrNascimento)
         try {
             api.put(`updUsuario/${idUsr}`, {
@@ -145,8 +139,8 @@ const AltAdmin = () => {
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Nascimento'
                             name='nascimento'
-                            value={nasc} 
-                            onChange={(e) => {setNasc(e.target.value)}} 
+                            value={usrNascimento} 
+                            onChange={(e) => {setNascimento(e.target.value)}} 
                           />
                         </div>                        
                         <div className='mb-4'>
