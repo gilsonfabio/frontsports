@@ -29,6 +29,7 @@ const AltAdmin = () => {
     const [usrCelular, setCelular] = useState('');
     const [usrCpf, setCpf] = useState('');
     const [usrNascimento, setNascimento] = useState('');
+    const [nasc, setNasc] = useState('');
     const [usrNivAcesso, setNivAcesso] = useState('');
     const [idUsr, setIdUsuario] = useState(router.query.usrId);
     
@@ -42,6 +43,7 @@ const AltAdmin = () => {
           setUsuario(response.data);
           setNome(response.data[0].usrNome); 
           setNascimento(response.data[0].usrNascimento); 
+          setNasc(response.data[0].usrNascimento); 
           setCpf(response.data[0].usrCpf); 
           setNivAcesso(response.data[0].usrNivAcesso); 
           setCelular(response.data[0].usrCelular);
@@ -53,7 +55,9 @@ const AltAdmin = () => {
         e.preventDefault();
 
         setIdUsuario(usrId);
-
+        let datNasc = nasc.substring(6,10) + '-' + nasc.substring(3,5) + '-' + nasc.substring(0,2);
+        setNascimento(datNasc); 
+        console.log(usrNascimento)
         try {
             api.put(`updUsuario/${idUsr}`, {
                 usrNome, 
@@ -137,8 +141,8 @@ const AltAdmin = () => {
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Nascimento'
                             name='nascimento'
-                            value={usrNascimento} 
-                            onChange={(e) => {setNascimento(e.target.value)}} 
+                            value={nasc} 
+                            onChange={(e) => {setNasc(e.target.value)}} 
                           />
                         </div>                        
                         <div className='mb-4'>
