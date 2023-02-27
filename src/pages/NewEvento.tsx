@@ -168,7 +168,7 @@ const CadEvento = ({modalidades}:apiProps) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  let urlModalidades = api + "/modalidades";
+  let urlModalidades = "https://backsports.herokuapp.com/modalidades";
   const resModalidades = await fetch(urlModalidades);
   const dataModalidades = await resModalidades.json()
 
