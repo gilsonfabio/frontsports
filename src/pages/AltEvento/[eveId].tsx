@@ -65,19 +65,19 @@ const AltEvento = () => {
         
         let datInicio = eveDatInicial.substring(7,10) + '-' + eveDatInicial.substring(4,5) + '-' + eveDatInicial.substring(1,2);
         setEveDatInicial(datInicio);
-        console.log('Data Inicio:', eveDatInicial);
+        console.log('Data Inicio:', datInicio);
         
         let datFinal = eveDatFinal.substring(7,10) + '-' + eveDatFinal.substring(4,5) + '-' + eveDatFinal.substring(1,2);
         setEveDatFinal(datFinal);
-        console.log('Data Final:', eveDatFinal);
+        console.log('Data Final:', datFinal);
         
         try {
           api.put(`updEvento/${idEve}`, {
             eveModalidade, 
             eveDescricao,
             eveAno,
-            eveDatInicial,
-            eveDatFinal,
+            eveDatInicial: datInicio,
+            eveDatFinal: datFinal,
             eveNroEquipes,
             eveGenero,    
             }).then(() => {
