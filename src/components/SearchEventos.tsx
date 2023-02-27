@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../pages/api/api";
 import Link from "next/link";
-import moment from "moment";
 
 interface eventosProps {
     eveId: number;
@@ -48,11 +47,11 @@ const SearchEventos = ({usrId, nivel}: any) => {
                                 <div className="flex flex-row items-start justify-between px-2 py-0 ">
                                     <div className="flex flex-col items-start px-2 py-1">
                                         <span className='text-[12px] font-bold'>Dt. Inicial</span>
-                                        <div className="text-[12px] mb-0">{moment(item.eveDatInicial).format('DD-MM-YYYY')}</div>
+                                        <div className="text-[12px] mb-0">{Intl.DateTimeFormat('pt-BR', {timeZone: 'UTC'}).format(Date.parse(item.eveDatInicial))}</div>
                                     </div>
                                     <div className="flex flex-col items-start px-2 py-1">
                                         <span className='text-[12px] font-bold'>Dt. Final</span>
-                                        <div className="text-[12px] mb-0">{moment(item.eveDatFinal).format('DD-MM-YYYY')}</div>
+                                        <div className="text-[12px] mb-0">{Intl.DateTimeFormat('pt-BR', {timeZone: 'UTC'}).format(Date.parse(item.eveDatFinal))}</div>
                                     </div>
                                 </div>                                
                                 <div className="flex flex-row items-start justify-between px-2">
