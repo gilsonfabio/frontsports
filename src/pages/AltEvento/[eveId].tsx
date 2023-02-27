@@ -62,7 +62,10 @@ const AltEvento = () => {
 
     async function handleAlterar(e:any){      
         e.preventDefault();
-
+        
+        let datProcess = eveDatInicial.substring(0,4) + '-' + eveDatInicial.substring(6,2) + '-' + eveDatInicial.substring(9,2);
+        console.log('Data Processamento:', datProcess);
+        
         try {
           api.put(`updEvento/${idEve}`, {
             eveModalidade, 
@@ -134,6 +137,11 @@ const AltEvento = () => {
                         <div>
                           <span className='text-gray-500 font-semibold text-[10px] '>Dt. inicial atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
                         </div>
+                        <div>
+                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. final atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
+                        </div>
+                      </div>
+                      <div className='grid grid-cols-2 gap-2'> 
                         <div className='mb-4'>
                           <input
                             type='date'
@@ -143,10 +151,7 @@ const AltEvento = () => {
                             value={eveDatInicial} 
                             onChange={(e) => {setEveDatInicial(e.target.value)}} 
                           />
-                        </div>
-                        <div>
-                          <span className='text-gray-500 font-semibold text-[10px] '>Dt. final atual:{moment(eveDatInicial).format('DD-MM-YYYY')}</span>
-                        </div>
+                        </div>                        
                         <div className='mb-4'>
                           <input
                             type='date'
