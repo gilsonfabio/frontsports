@@ -63,7 +63,7 @@ const AltEvento = () => {
     async function handleAlterar(e:any){      
         e.preventDefault();
         
-        let datProcess = eveDatInicial.substring(0,4) + '-' + eveDatInicial.substring(5,7) + '-' + eveDatInicial.substring(9,11);
+        let datProcess = eveDatInicial.substring(0,4) + '-' + eveDatInicial.substring(5,7) + '-' + eveDatInicial.substring(8,10);
         console.log('Data Processamento:', datProcess);
         
         try {
