@@ -6,7 +6,6 @@ import api from './api/api';
 
 const NewModalidade = () => {
     const [modDescricao, setDescricao] = useState('');
-    const jwt = localStorage.getItem('tokenJWT');
 
     async function handleCadastra(e:any){      
         e.preventDefault();
@@ -14,12 +13,7 @@ const NewModalidade = () => {
         try {
             api.post('newmodalidade', {
                 modDescricao,
-            },
-            {
-              headers: {
-                  'x-access-token': jwt
-              }
-          }).then(() => {
+            }).then(() => {
                 alert('Modalidade cadastrada com sucesso!')
             }).catch(() => {
                 alert('Erro no cadastro!');

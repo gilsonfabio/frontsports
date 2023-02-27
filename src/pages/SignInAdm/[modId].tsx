@@ -16,7 +16,6 @@ const SignInAdm = () => {
         e.preventDefault();
         try {
           const response = await api.get(`loginAdm/${email}/${password}/${modId}`);
-          localStorage.setItem('tokenJWT', response.data.token);
           let idUsuario = response.data.user.usrId;
           let nomUsuario = response.data.user.usrNome;
           let nivAcesso = response.data.user.usrNivAcesso;

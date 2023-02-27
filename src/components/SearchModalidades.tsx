@@ -14,28 +14,21 @@ const SearchModalidades = ({usrId, nivel}: any) => {
     const [nivAcesso, setNivAcesso] = useState(nivel);
     const [nivLiberado, setNivLiberado] = useState('9');
     const router = useRouter();
-    
-    const jwt = localStorage.getItem('tokenJWT');
-    
+   
     useEffect(() => {
         if (nivAcesso == nivLiberado) {   
             api.get(`/modalidades`).then(response => {
                 setModalidades(response.data);            
             })
         }else {
-            api.get(`/modUsuario/${idUsr}`,{
-                headers: {
-                    'x-access-token': jwt
-                }
-            }).then(response => {
+            api.get(`/modUsuario/${idUsr}`).then(response => {
                 setModalidades(response.data);
             }).catch((err) => {
                 //localStorage.clear()
                 Router.push({
                     pathname: '/SignUpForm',        
                   })   
-            })
-            
+            })            
         }     
     }, [])
 

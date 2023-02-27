@@ -16,8 +16,6 @@ const CadEvento = () => {
     const [eveGenero, setGenero] = useState('');
 
     const {query: { id }, } = router;
-    
-    const jwt = localStorage.getItem('tokenJWT');
 
     async function handleCadastra(e:any){      
         e.preventDefault();
@@ -33,10 +31,6 @@ const CadEvento = () => {
                 eveDatFinal, 
                 eveNroEquipes, 
                 eveGenero, 
-            },{
-              headers: {
-                  'x-access-token': jwt
-              }
             }).then(() => {
                 alert('Evento cadastrado com sucesso!')
             }).catch(() => {
