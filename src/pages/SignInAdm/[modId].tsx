@@ -16,8 +16,10 @@ const SignInAdm = () => {
         e.preventDefault();
         try {
           const response = await api.get(`loginAdm/${email}/${password}/${modId}`);
-          let idUsuario = response.data.usrId;
-          let nomUsuario = response.data.usrNome;
+          localStorage.setItem('tokenJWT', response.data.token);
+          let idUsuario = response.data.user.usrId;
+          let nomUsuario = response.data.user.usrNome;
+          let nivAcesso = response.data.user.usrNivAcesso;
           Router.push({
             pathname: '/CadEvento',
               query: { id: `${modId}`}

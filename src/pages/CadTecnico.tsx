@@ -18,7 +18,9 @@ const CadTecnico = () => {
 
     async function handleCadastra(e:any){      
         e.preventDefault();
-
+        let datNasc = nascimento.substring(6,10) + '-' + nascimento.substring(3,5) + '-' + nascimento.substring(0,2);
+        setTecNascimento(datNasc);
+        console.log(nascimento)
         try {
             api.post('newtecnico', {
                 nome, 

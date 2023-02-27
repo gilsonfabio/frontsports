@@ -3,16 +3,23 @@ import Router from 'next/router';
 
 import api from './api/api';
 
+
 const NewModalidade = () => {
     const [modDescricao, setDescricao] = useState('');
+    const jwt = localStorage.getItem('tokenJWT');
 
     async function handleCadastra(e:any){      
         e.preventDefault();
 
         try {
-            api.post('newevento', {
+            api.post('newmodalidade', {
                 modDescricao,
-            }).then(() => {
+            },
+            {
+              headers: {
+                  'x-access-token': jwt
+              }
+          }).then(() => {
                 alert('Modalidade cadastrada com sucesso!')
             }).catch(() => {
                 alert('Erro no cadastro!');

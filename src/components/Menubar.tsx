@@ -1,19 +1,29 @@
 import React from 'react'
 import Image from 'next/image'
+import Router, { useRouter } from "next/router";
 
 import logoBarra from '../assets/images/logo-barra.png'
 import Link from 'next/link';
 import DropMenu from './DropMenu';
 
+function handleHome() {
+    localStorage.clear();
+    Router.push({
+        pathname: '/',        
+      })      
+}
+
 const Menubar = () => {   
+    const router = useRouter();
+
     return (
         <nav className="bg-black p-2">
             <div className="flex justify-between items-center mx-auto">
                 <div className="flex flex-row items-center ml-2 md:ml-36" >
                     <div className="flex items-center ">
-                        <Link href="/" passHref>
+                        <button onClick={handleHome} >
                             <Image src={logoBarra} alt="" width={140} height={30} />
-                        </Link>                        
+                        </button>                        
                     </div>                    
                 </div> 
                 <div className="flex flex-row items-center mr-2 md:mr-36" >

@@ -49,7 +49,7 @@ const Slideshow = () => {
     		    {images.map((each, index) => (
 				    <div key={index} className="flex  w-full ">
 					    <img
-						    className="w-full h-144 object-cover rounded-lg shadow-xl"
+						    className="w-full h-144 object-cover shadow-xl"
 						    src={each}
 					    />
 						<span className="font-serif flex flex-auto absolute text-white text-4xl md:text-6xl mt-28 md:ml-32 items-center p-2 md:items-start justify-start">

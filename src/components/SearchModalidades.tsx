@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../pages/api/api";
 import Link from "next/link";
+import Router, { useRouter } from "next/router";
 
 interface modalProps {
     modId: number;
@@ -12,18 +13,29 @@ const SearchModalidades = ({usrId, nivel}: any) => {
     const [idUsr, setIdUsuario] = useState(usrId);
     const [nivAcesso, setNivAcesso] = useState(nivel);
     const [nivLiberado, setNivLiberado] = useState('9');
-
+    const router = useRouter();
+    
+    const jwt = localStorage.getItem('tokenJWT');
+    
     useEffect(() => {
-
         if (nivAcesso == nivLiberado) {   
             api.get(`/modalidades`).then(response => {
-                setModalidades(response.data);
-            
+                setModalidades(response.data);            
             })
         }else {
-            api.get(`/modUsuario/${idUsr}`).then(response => {
+            api.get(`/modUsuario/${idUsr}`,{
+                headers: {
+                    'x-access-token': jwt
+                }
+            }).then(response => {
                 setModalidades(response.data);
-            }) 
+            }).catch((err) => {
+                //localStorage.clear()
+                Router.push({
+                    pathname: '/SignUpForm',        
+                  })   
+            })
+            
         }     
     }, [])
 
