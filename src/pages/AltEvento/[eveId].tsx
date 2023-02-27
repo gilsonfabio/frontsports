@@ -63,11 +63,11 @@ const AltEvento = () => {
     async function handleAlterar(e:any){      
         e.preventDefault();
         
-        let datInicio = eveDatInicial.substring(0,4) + '-' + eveDatInicial.substring(5,7) + '-' + eveDatInicial.substring(8,10);
+        let datInicio = eveDatInicial.substring(6,9) + '-' + eveDatInicial.substring(4,6) + '-' + eveDatInicial.substring(0,2);
         setEveDatInicial(datInicio);
         console.log('Data Inicio:', eveDatInicial);
         
-        let datFinal = eveDatFinal.substring(0,4) + '-' + eveDatFinal.substring(5,7) + '-' + eveDatFinal.substring(8,10);
+        let datFinal = eveDatFinal.substring(5,9) + '-' + eveDatFinal.substring(4,6) + '-' + eveDatFinal.substring(1,3);
         setEveDatFinal(datFinal);
         console.log('Data Final:', eveDatFinal);
         
@@ -149,7 +149,7 @@ const AltEvento = () => {
                       <div className='grid grid-cols-2 gap-2'> 
                         <div className='mb-4'>
                           <input
-                            type='date'
+                            type='text'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Data Inicial'
                             name='datInicial'
@@ -159,7 +159,7 @@ const AltEvento = () => {
                         </div>                        
                         <div className='mb-4'>
                           <input
-                            type='date'
+                            type='text'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Data Final'
                             name='datFinal'
