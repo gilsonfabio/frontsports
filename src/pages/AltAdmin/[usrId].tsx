@@ -55,9 +55,12 @@ const AltAdmin = () => {
         e.preventDefault();
 
         setIdUsuario(usrId);
-        console.log('data antes',nasc)
+        console.log('data antes',nasc);
+
         let datNasc = nasc.substring(6,10) + '-' + nasc.substring(3,5) + '-' + nasc.substring(0,2);
+        
         setNascimento(datNasc); 
+        
         console.log('data após',usrNascimento)
         try {
             api.put(`updUsuario/${idUsr}`, {
