@@ -35,7 +35,7 @@ const Menubar = () => {
                         </Link>            
                     </div>
                     <div className=''>
-                        <span className='text-xs text-green-400'>Versão:1.02 - 28-02-2023</span>
+                        <span className='ml-3 text-[8px] text-green-400'>Versão:1.02 - 28-02-2023</span>
                     </div>
                 </div>                              
             </div>
