@@ -20,9 +20,9 @@ const SignUpForm = () => {
           Router.push({
             pathname: '/Dashboard',
               query: { 
-                id: idUsuario, 
-                name: nomUsuario, 
-                nivAce: nivAcesso
+                id: `${idUsuario}`, 
+                name: `${nomUsuario}`, 
+                nivAce: `${nivAcesso}`
               },
             })            
               
