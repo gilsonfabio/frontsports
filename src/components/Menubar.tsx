@@ -32,6 +32,9 @@ const Menubar = () => {
                             Login Admin
                         </a>  
                     </Link>            
+                </div>
+                <div className=''>
+                    <span className='text-sm text-green-400'>Versão:1.02 - 28-02-2023</span>
                 </div>                          
             </div>
         </nav> 
