@@ -13,9 +13,9 @@ const SignUpForm = () => {
     async function sendLogin(e:any){
       e.preventDefault();   
       const response = await api.get(`signIn/${email}/${password}`);
-      let idUsuario = response.data.user.usrId;
-      let nomUsuario = response.data.user.usrNome;
-      let nivAcesso = response.data.user.usrNivAcesso;
+      let idUsuario = response.data.usrId;
+      let nomUsuario = response.data.usrNome;
+      let nivAcesso = response.data.usrNivAcesso;
  
           Router.push({
             pathname: '/Dashboard',
