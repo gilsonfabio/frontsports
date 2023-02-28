@@ -12,12 +12,11 @@ const SignUpForm = () => {
 
     async function sendLogin(e:any){
       e.preventDefault();   
-      try {
-          const response = await api.get(`signIn/${email}/${password}`);
-          let idUsuario = response.data.user.usrId;
-          let nomUsuario = response.data.user.usrNome;
-          let nivAcesso = response.data.user.usrNivAcesso;
-        
+      const response = await api.get(`signIn/${email}/${password}`);
+      let idUsuario = response.data.user.usrId;
+      let nomUsuario = response.data.user.usrNome;
+      let nivAcesso = response.data.user.usrNivAcesso;
+ 
           Router.push({
             pathname: '/dashboard',
               query: { 
@@ -26,9 +25,7 @@ const SignUpForm = () => {
                 nivAce: nivAcesso
               },
             })            
-      } catch (err) {
-        alert(`Falha no login usuário! Tente novamente.`);
-      }         
+              
     }
     
     return (
