@@ -59,13 +59,13 @@ const AltAtleta = () => {
 
     async function handleAlteracao(e:any){      
         e.preventDefault();
-        let datProcess = atlNascimento.substring(6,10) + '-' + atlNascimento.substring(3,5) + '-' + atlNascimento.substring(0,2);
+        
         setIdAtleta(id);
 
         try {
             api.put(`updAtleta/${atlId}`, {
                 atlNome, 
-                atlNascimento: datProcess, 
+                atlNascimento, 
                 atlCpf, 
                 atlIdentidade, 
                 atlOrgEmissor, 
@@ -114,7 +114,7 @@ const AltAtleta = () => {
                       <div className='grid grid-cols-2 gap-2'>   
                         <div className='mb-4'>
                           <input
-                            type='text'
+                            type='date'
                             className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
                             placeholder='Informe Nascimento'
                             name='nascimento'
