@@ -18,7 +18,7 @@ const SignUpForm = () => {
       let nivAcesso = response.data.user.usrNivAcesso;
  
           Router.push({
-            pathname: '/dashboard',
+            pathname: '/Dashboard',
               query: { 
                 id: idUsuario, 
                 name: nomUsuario, 
