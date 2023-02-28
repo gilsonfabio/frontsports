@@ -13,25 +13,20 @@ const SignUpForm = () => {
     async function sendLogin(e:any){
       e.preventDefault();   
       try {
-        if(email == admEmail && password == admPassword ) {
-          let idUsuario = 999999;
-          let nomUsuario = 'Administrador';
-          let nivAcesso = 9;          
-          Router.push({
-            pathname: '/Dashboard',
-              query: { id: `${idUsuario}`, name: `${nomUsuario}`, nivAce: `${nivAcesso}`}
-            })
-        }else {
           const response = await api.get(`signIn/${email}/${password}`);
           let idUsuario = response.data.user.usrId;
           let nomUsuario = response.data.user.usrNome;
           let nivAcesso = response.data.user.usrNivAcesso;
-          
+        
           Router.push({
             pathname: '/Dashboard',
-              query: { id: `${idUsuario}`, name: `${nomUsuario}`, nivAce: `${nivAcesso}`}
+              query: { 
+                id: idUsuario, 
+                name: nomUsuario, 
+                nivAce: nivAcesso
+              }
             })
-        }    
+            
       } catch (err) {
         alert(`Falha no login usuário! Tente novamente.`);
       }         
