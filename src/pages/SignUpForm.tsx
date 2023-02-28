@@ -19,14 +19,13 @@ const SignUpForm = () => {
           let nivAcesso = response.data.user.usrNivAcesso;
         
           Router.push({
-            pathname: '/Dashboard',
+            pathname: '/dashboard',
               query: { 
                 id: idUsuario, 
                 name: nomUsuario, 
                 nivAce: nivAcesso
-              }
-            })
-            
+              },
+            })            
       } catch (err) {
         alert(`Falha no login usuário! Tente novamente.`);
       }         
