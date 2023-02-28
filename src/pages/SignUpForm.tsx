@@ -11,11 +11,12 @@ const SignUpForm = () => {
     const [admPassword, setAdmPassword] = useState(process.env.NEXT_PUBLIC_ADMIN_PASSWORD);   
 
     async function sendLogin(e:any){
-      e.preventDefault();   
-      const response = await api.get(`signIn/${email}/${password}`);
-      let idUsuario = response.data.usrId;
-      let nomUsuario = response.data.usrNome;
-      let nivAcesso = response.data.usrNivAcesso;
+      e.preventDefault(); 
+      try {  
+        const response = await api.get(`signIn/${email}/${password}`);
+        let idUsuario = response.data.usrId;
+        let nomUsuario = response.data.usrNome;
+        let nivAcesso = response.data.usrNivAcesso;
  
           Router.push({
             pathname: '/Dashboard',
@@ -25,9 +26,11 @@ const SignUpForm = () => {
                 nivAce: `${nivAcesso}`
               },
             })            
-              
+      }catch (err) {
+        alert(`Falha no login Administrativo! Tente novamente. ${email}`);
+      }             
     }
-    
+
     return (
     <section className='flex items-center justify-center h-full gradient-form bg-gray-200 md:h-screen'>
       <div className='container py-12 px-6 h-full'>
