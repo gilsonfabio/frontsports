@@ -5,6 +5,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import Image from 'next/image';
 import Slideshow from '../components/SliderShow';
+import Link from 'next/link';
 
 export default function Home() {
   const { register, handleSubmit } = useForm();
@@ -50,9 +51,11 @@ export default function Home() {
               </label>
             </div>    
             <div className="text-sm">
-              <a href="/ForgotPassword" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Esqueceu sua senha?
-              </a>
+              <Link href={"/ForgotPassword"} passHref> 
+                <span className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Esqueceu sua senha?
+                </span>  
+              </Link>
             </div>      
           </div>
           <div className="rounded-md shadow-sm -space-y-px">
@@ -100,17 +103,20 @@ export default function Home() {
           </div>
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <a href="/NewTecnico" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Faça seu cadastra p/Técnico
-              </a>
+              <Link href={"/NewTecnico"} passHref>
+                <span className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Faça seu cadastra p/Técnico
+                </span>  
+              </Link>
             </div>
             <div className="text-sm">
-              <a href="/ForgotPassword" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Esqueceu sua senha Técnico?
-              </a>
+              <Link href={"/ForgotPassword"} passHref>
+                <span className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Esqueceu sua senha Técnico?
+                </span>  
+              </Link>
             </div>                      
           </div>
-
         </form>
         </div>
       </div>
