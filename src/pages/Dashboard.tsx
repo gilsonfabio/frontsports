@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Menubar from '../components/Menubar';
 import Router, { useRouter } from "next/router";
 import { AuthContext } from '../contexts/AuthContext';
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
 interface localProps {
   token: string;
@@ -12,12 +13,15 @@ interface localProps {
 const Dashboard = () => {
     const router = useRouter();
     const { user } = useContext(AuthContext)
-    const [idUsr, setIdUsuario] = useState(router.query.id);
     const [nivLiberado, setNivLiberado] = useState('');    
-    const [nivAcesso, setNivAcesso] = useState(router.query.nivAce);
     const {query: { id }, } = router;
     const {query: { nivAce }, } = router;
 
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     useEffect(() => {        
       setNivLiberado('9');      
@@ -61,7 +65,7 @@ const Dashboard = () => {
       <div className='flex flex-col w-screen '>
         <Menubar />
         <Header />        
-      </div>
+      </div>      
       <div className="md:ml-32 md:mr-32 text-green-500 p-2 grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-2 mt-6" >  
         <button onClick={handleModalidades} className="">
           <div className="flex items-center justify-center h-24 rounded overflow-hidden shadow-2xl mb-5 " > 

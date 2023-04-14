@@ -25,6 +25,9 @@ const SearchModalidades = ({usrId, nivel}: any) => {
     const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     useEffect(() => {
+
+        console.log(token);
+
         if (nivAcesso === nivLiberado) {
             api({
                 method: 'get',    
