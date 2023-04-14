@@ -4,8 +4,9 @@ import { parseCookies } from "nookies";
 export function getAPIClient(ctx?: any) {
   const { 'nextauth.token': token } = parseCookies(ctx)
 
+  //baseURL: 'https://backsports.herokuapp.com'
   const api = axios.create({
-    baseURL: 'https://backsports.herokuapp.com'
+    baseURL: 'http://localhost:3333'
   })
 
   api.interceptors.request.use(config => {

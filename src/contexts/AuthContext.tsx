@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
         setUser(user)
 
         Router.push({
-          pathname: '/dashboard',
+          pathname: '/Dashboard',
         })
       }).catch(function(error) {
         alert(`Falha no login Administrativo! Tente novamente. ${email}`);
@@ -106,7 +106,7 @@ export function AuthProvider({ children }) {
         setUser(user)
 
         Router.push({
-          pathname: '/dashboardTec',
+          pathname: '/DashboardTec',
         })
       }).catch(function(error) {
         alert(`Falha no login de acesso Técnico! Tente novamente. ${email}`);
