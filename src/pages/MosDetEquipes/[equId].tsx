@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import api from "../api/api";
+import {api} from "../../services/api";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies';
+
 import Menubar from "../../components/Menubar";
 import moment from 'moment';
 
@@ -37,23 +39,76 @@ const MosDetEquipes = () => {
     const [nomEquipe, setNomEquipe] = useState('');
     
     const {query: { equId }, } = router
+    
+    const [saving, setSaving] = useState(0);
+    const [atualiza, setAtualiza] = useState(0);
+   
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     useEffect(() => {    
     
         setIdEquipe(equId);
   
-        api.get(`/dadEquipe/${idEqu}`).then(response => {
-            setEquipe(response.data);
-            setNomEquipe(response.data[0].equDescricao);
-            console.log(response.data)
-        })
+        api({
+          method: 'get',    
+          url: `dadEquipe/${idEqu}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(resp) {
+            setEquipe(resp.data);
+            setNomEquipe(resp.data[0].equDescricao);
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        })    
 
-        api.get(`/atlEquipe/${idEqu}`).then(resp => {
+        api({
+          method: 'get',    
+          url: `atlEquipe/${idEqu}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(resp) {
           setAtletas(resp.data);
-          console.log(resp.data)
-      })   
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        })    
+    }, [atualiza])
 
-    }, [])
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          setAtualiza(atualiza + 1 )
+      }).catch(function(error) {
+          alert(`Falha no token de acesso das equipes!`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
+    }
 
     return (
         <div className="w-screen h-full bg-white">

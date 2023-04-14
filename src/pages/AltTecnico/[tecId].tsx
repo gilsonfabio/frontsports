@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from '../api/api';
+import { api } from "../../services/api";
 
 interface tecnicoProps {
     tecId: number;
@@ -24,42 +24,95 @@ const AltTecnico = () => {
     const [tecEmail, setTecEmail] = useState('');
     const [idTec, setIdTecnico] = useState(router.query.tecId);
     
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
     const {query: { tecId }, } = router;
 
     useEffect(() => {    
     
         setIdTecnico(tecId);
   
-        api.get(`/dadTecnico/${tecId}`).then(response => {
-            setTecNome(response.data[0].tecNome); 
+        api({
+          method: 'get',    
+          url: `dadTecnico/${tecId}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setTecNome(response.data[0].tecNome); 
             setTecNascimento(response.data[0].tecNascimento); 
             setTecCpf(response.data[0].tecCpf); 
             setTecEmail(response.data[0].tecEmail); 
             setTecCelular(response.data[0].tecCelular); 
-        })            
-    }, [])
+        }).catch(function(error) {           
+          handleRefreshToken()                 
+        })
+    }, [atualiza])
 
     async function handleAlteracao(e:any){      
         e.preventDefault();
-       
         setIdTecnico(tecId);
+        api({
+          method: 'put',    
+          url: `updTecnico/${tecId}`,
+          data: {
+            tecNome, 
+            tecNascimento, 
+            tecCpf, 
+            tecEmail, 
+            tecCelular,                      
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          alert('Técnico alterado com sucesso!')
+          Router.back()
+        }).catch(function(error) {
+          setSaving(saving + 1)
+          handleRefreshToken()          
+        })  
+    }
 
-        try {
-            api.put(`updTecnico/${tecId}`, {
-                tecNome, 
-                tecNascimento, 
-                tecCpf, 
-                tecEmail, 
-                tecCelular, 
-            }).then(() => {
-                alert('Técnico alterado com sucesso!')
-            }).catch(() => {
-                alert('Erro na alteração!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha na alteração do técnico!');
-        }  
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          if (saving === 1){
+            handleAlteracao
+          }else {
+            setAtualiza(atualiza + 1)
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso aos técnicos`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

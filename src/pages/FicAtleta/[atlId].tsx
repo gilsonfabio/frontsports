@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import { TDocumentDefinitions } from "pdfmake/interfaces";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
 import Router, { useRouter } from 'next/router';
 
-import api from '../api/api';
+import { api } from "../../services/api";
+
 import Menubar from '../../components/Menubar';
 
 interface atletaProps {
     atlId: number;
     atlNome: string;
 }
-
 
 const FicAtleta = () => {
     const router = useRouter();
@@ -32,7 +33,16 @@ const FicAtleta = () => {
 
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
     
-    const {query: { atlId }, } = router
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
+    const {query: { atlId } } = router
 
     const reportTitle: any = [            
         [
@@ -48,7 +58,6 @@ const FicAtleta = () => {
             {text: `fornece as seguintes informações:\n\n`, fontSize: 10, bold: false, alignment: 'justify',},
         ],             
     ];
-
     
     const dados = atleta.map((row) => {
         return [
@@ -361,9 +370,16 @@ const FicAtleta = () => {
         content: [subtexto,details],
     };
    
-    useEffect(() => {
-        setCodAtleta(atlId);
-        api.get(`busAtleta/${atlId}`).then(resp => {
+    useEffect(() => {        
+        let atlId = codAtleta;
+
+        api({
+            method: 'get',    
+            url: `busAtleta/${atlId}`,
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(resp) {
             setAtleta(resp.data);  
             setNomAtleta(resp.data[0].atlNome)
             setNasAtleta(resp.data[0].atlNascimento)
@@ -375,15 +391,48 @@ const FicAtleta = () => {
             setIdeAtleta(resp.data[0].atlIdentidade)
             setOrgAtleta(resp.data[0].atlOrgEmissor)
             setCivAtleta(resp.data[0].atlEstCivil)
-           
+        }).catch(function(error) {           
+            handleRefreshToken()                 
         })
-    },[]);
+
+    },[atualiza]);
 
     function emitePdf() {
         pdfMake.createPdf(docDefinition).open();       
         //pdfMake.createPdf(docDefinition).download();  
     };
     
+    async function handleRefreshToken(){
+        await api({
+            method: 'post',    
+            url: `refreshToken`,
+            data: {
+                idUsr,                            
+            },
+            headers: {
+                "x-access-token" : refreshToken    
+            },      
+        }).then(function(response) {
+            destroyCookie({}, 'nextauth.token');
+            destroyCookie({}, 'nextauth.usrId');
+            destroyCookie({}, 'nextauth.usrNome');
+            destroyCookie({}, 'nextauth.usrNivAcesso');
+            destroyCookie({}, 'nextauth.refreshToken'); 
+            
+            setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+            setAtualiza(atualiza + 1)
+        }).catch(function(error) {
+            alert(`Falha no token de acesso aos técnicos`);
+            Router.push({
+                pathname: '/',        
+            })      
+        })
+    }
+
     return (
         <div>
            <Menubar />

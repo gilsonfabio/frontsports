@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from '../api/api';
+import { api } from "../../services/api";
 
 interface equipeProps {
     equId: number;
@@ -34,46 +34,110 @@ const AltEquipe = () => {
     const [idMod, setModalidades] = useState(1);
     const [eventos, setEventos] = useState<Array<eventosProps>>([]);
     
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
     const {query: { id }, } = router;
 
     useEffect(() => {    
     
         setIdEquipe(id);
   
-        api.get(`/dadEquipe/${idEqu}`).then(response => {
-            setEquipe(response.data);
-            setIdEvento(response.data[0].equIdEvento);
-            setDescricao(response.data[0].equDescricao);
-            setRegiao(response.data[0].equRegiao);
-            setResponsavel(response.data[0].equResp);
-            setDirigente(response.data[0].equDirigente);
-        })   
-        
-        api.get(`/eventos`).then(response => {
-          setEventos(response.data);
+        api({
+          method: 'get',    
+          url: `dadEquipe/${idEqu}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setEquipe(response.data);
+          setIdEvento(response.data[0].equIdEvento);
+          setDescricao(response.data[0].equDescricao);
+          setRegiao(response.data[0].equRegiao);
+          setResponsavel(response.data[0].equResp);
+          setDirigente(response.data[0].equDirigente);
+        }).catch(function(error) {           
+          handleRefreshToken()                 
         })
 
-    }, [])
+        api({
+          method: 'get',    
+          url: `eventos`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setEventos(response.data);
+        }).catch(function(error) {           
+          handleRefreshToken()                 
+        })
+
+    }, [atualiza])
 
     async function handleAlterar(e:any){      
         e.preventDefault();
 
-        try {
-          api.put(`updEquipe/${idEqu}`, {
-                equDescricao,
-                equIdEvento, 
-                equRegiao, 
-                equResp, 
-                equDirigente, 
-            }).then(() => {
-                alert('Equipe alterada com sucesso!')
-            }).catch(() => {
-                alert('Erro na alteração!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha na Alteração da Equipe!');
-        }  
+        api({
+          method: 'put',    
+          url: `updEquipe/${idEqu}`,
+          data: {
+            equDescricao,
+            equIdEvento, 
+            equRegiao, 
+            equResp, 
+            equDirigente,                      
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          alert('Equipe alterada com sucesso!')
+          Router.back()
+        }).catch(function(error) {
+          setSaving(saving + 1)
+          handleRefreshToken()          
+        })
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          if (saving === 1){
+            handleAlterar
+          }else {
+            setAtualiza(atualiza + 1)
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso a equipes`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

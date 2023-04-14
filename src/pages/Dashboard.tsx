@@ -1,21 +1,26 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import Link from 'next/link';
 import Header from '../components/Header';
 import Menubar from '../components/Menubar';
 import Router, { useRouter } from "next/router";
+import { AuthContext } from '../contexts/AuthContext';
+
+interface localProps {
+  token: string;
+}
 
 const Dashboard = () => {
     const router = useRouter();
+    const { user } = useContext(AuthContext)
     const [idUsr, setIdUsuario] = useState(router.query.id);
     const [nivLiberado, setNivLiberado] = useState('');    
     const [nivAcesso, setNivAcesso] = useState(router.query.nivAce);
-
     const {query: { id }, } = router;
     const {query: { nivAce }, } = router;
 
+
     useEffect(() => {        
       setNivLiberado('9');      
-              
     }, [])
     
     function handleModalidades(){

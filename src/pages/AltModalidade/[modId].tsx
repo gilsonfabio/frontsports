@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from '../api/api';
+import { api } from "../../services/api";
 
 interface equipeProps {
     equId: number;
@@ -20,33 +20,88 @@ const AltModalidade = () => {
     const [idMol, setIdModalidade] = useState(router.query.modId); 
     const [modDescricao, setDescricao] = useState('');
     
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
     const {query: { modId }, } = router;
 
     useEffect(() => {    
     
-        setIdModalidade(modId);
+      setIdModalidade(modId);
   
-        api.get(`/dadModalidade/${modId}`).then(response => {
-            setDescricao(response.data[0].modDescricao);
-        })   
+      api({
+        method: 'get',    
+        url: `dadModalidade/${modId}`,
+        headers: {
+            "x-access-token" : token    
+        },      
+      }).then(function(response) {
+        setDescricao(response.data[0].modDescricao);
+      }).catch(function(error) {           
+        handleRefreshToken()                 
+      })
 
-    }, [])
+    }, [atualiza])
 
     async function handleAlterar(e:any){      
-        e.preventDefault();
+      e.preventDefault();
+      api({
+          method: 'put',    
+          url: `updModalidade/${modId}`,
+          data: {
+            modDescricao,                            
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+      }).then(function(response) {
+          alert('Modalidade alterada com sucesso!')
+          Router.back()
+      }).catch(function(error) {
+          setSaving(saving + 1)
+          handleRefreshToken()          
+      })
+    }
 
-        try {
-          api.put(`updModalidade/${modId}`, {
-                modDescricao,
-            }).then(() => {
-                alert('Modalidade alterada com sucesso!')
-            }).catch(() => {
-                alert('Erro na alteração!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha na Alteração da Modalidade!');
-        }  
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          if (saving === 1){
+            handleAlterar
+          }else {
+            setAtualiza(atualiza + 1)
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de cadastro de modalidades`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import Router from 'next/router';
 
-import api from './api/api';
+import {api} from '../services/api';
 import Link from 'next/link';
 
 const SignUpForm = () => {

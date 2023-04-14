@@ -1,47 +1,45 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 
 import {api} from "../services/api";
 
-const CadAdmin = () => {
-    const router = useRouter();
-
+const NewTecnico = () => {
     const [nome, setTecNome] = useState(''); 
     const [email, setTecEmail] = useState('');
     const [password, setTecPassword] = useState('');
     const [celular, setTecCelular] = useState('');
     const [cpf, setTecCpf] = useState('');
     const [nascimento, setTecNascimento] = useState('');
-    const [nivAcesso, setNivAcesso] = useState('');
 
-     const {query: { id }, } = router;
+    const [saving, setSaving] = useState(0);
+    const [atualiza, setAtualiza] = useState(0);
+    const router = useRouter();
+
+    const {query: { id }, } = router;
 
     async function handleCadastra(e:any){      
         e.preventDefault();
-        
-        try {
-            api.post('newuser', {
-                nome, 
-                cpf, 
-                nascimento, 
-                email, 
-                celular, 
-                password,
-                nivAcesso
-            }).then(() => {
-                alert('Administrador(a) cadastrado com sucesso!')
-            }).catch(() => {
-                alert('Erro no cadastro!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha no Cadastro de Administrador(a)!');
-        }  
+        api({
+          method: 'post',    
+          url: `cadtecnico`,
+          data: {
+            nome, 
+            cpf, 
+            nascimento, 
+            email, 
+            celular, 
+            password                          
+          },
+        }).then(function(response) {
+          alert('Técnico cadastrado com sucesso!')
+          Router.back()
+        }).catch(function(error) {
+          alert('Erro no cadastro do técnico!')
+        })
     }
 
     return (
-    <section className='flex items-center justify-center h-screen gradient-form bg-gray-200 md:h-screen'>
+    <section className='flex justify-center items-center h-screen gradient-form bg-gray-200 md:h-screen'>
       <div className='container py-12 px-6 h-full'>
         <div className=' flex justify-center items-center flex-wrap h-full g-6 text-gray-800'>
           <div className=''>
@@ -51,7 +49,7 @@ const CadAdmin = () => {
                   <div className='md:p-12 md:mx-6'>
                     <div className='text-center'>
                       <h4 className='text-xl font-semibold mt-1 mb-12 pb-1'>
-                        Formulário de Cadastro de Administrador(a)
+                        Formulário de Cadastro de Técnicos
                       </h4>
                     </div>
                     <form>                       
@@ -118,16 +116,6 @@ const CadAdmin = () => {
                             onChange={(e) => {setTecPassword(e.target.value)}} 
                           />
                         </div>
-                        <div className='mb-4'>
-                          <input
-                            type='number'
-                            className='form-control block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none'
-                            placeholder='Informe Nivel Acesso'
-                            name='nivAcesso'
-                            value={nivAcesso} 
-                            onChange={(e) => {setNivAcesso(e.target.value)}} 
-                          />
-                        </div>
                       </div>                                         
                       <div className='text-center pt-1 mb-12 pb-1'>
                         <button
@@ -149,4 +137,4 @@ const CadAdmin = () => {
     </section>
     );
 };
-export default CadAdmin;
+export default NewTecnico;

@@ -3,11 +3,12 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import { TDocumentDefinitions } from "pdfmake/interfaces";
 import moment from 'moment';
-
 import Router, { useRouter } from 'next/router';
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from '../api/api';
 import Menubar from '../../components/Menubar';
+
+import { api } from "../../services/api";
 
 interface atletaProps {
     atlId: number;
@@ -39,6 +40,14 @@ const FicEquipe = () => {
     const [tecNome, setTecNome] = useState('');
     const [idEqu, setIdEquipe] = useState(router.query.equId);
 
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     pdfMake.vfs = pdfFonts.pdfMake.vfs;
     
@@ -330,14 +339,20 @@ const FicEquipe = () => {
         pageMargins: [15, 50, 15, 40],
     
         header: [reportTitle],
-        content: [details],
-        
+        content: [details],        
     };
    
     useEffect(() => {
         
         setIdEquipe(equId);
-        api.get(`dadEquipe/${idEqu}`).then(response => {
+
+        api({
+            method: 'get',    
+            url: `dadEquipe/${idEqu}`,
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(response) {
             setEquDescricao(response.data[0].equDescricao);
             setEquIdEvento(response.data[0].equIdEvento);
             setEquRegiao(response.data[0].equRegiao);
@@ -346,19 +361,60 @@ const FicEquipe = () => {
             setEquDirigente(response.data[0].equDirigente); 
             setTecNome(response.data[0].tecNome);    
             setTecEmail(response.data[0].tecEmail); 
-            setTecCelular(response.data[0].tecCelular);              
-        })
-        api.get(`atlEquipe/${idEqu}`).then(resp => {
-            setAtletas(resp.data); 
+            setTecCelular(response.data[0].tecCelular);           
+        }).catch(function(error) {           
+            handleRefreshToken()                 
         })
 
-    },[]);
+        api({
+            method: 'get',    
+            url: `atlEquipe/${idEqu}`,
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(resp) {
+            setAtletas(resp.data);           
+        }).catch(function(error) {           
+            handleRefreshToken()                 
+        })
+    },[atualiza]);
 
     function emitePdf() {
         pdfMake.createPdf(docDefinition).open();       
         //pdfMake.createPdf(docDefinition).download();  
     };
     
+    async function handleRefreshToken(){
+        await api({
+            method: 'post',    
+            url: `refreshToken`,
+            data: {
+                idUsr,                            
+            },
+            headers: {
+                "x-access-token" : refreshToken    
+            },      
+        }).then(function(response) {
+            destroyCookie({}, 'nextauth.token');
+            destroyCookie({}, 'nextauth.usrId');
+            destroyCookie({}, 'nextauth.usrNome');
+            destroyCookie({}, 'nextauth.usrNivAcesso');
+            destroyCookie({}, 'nextauth.refreshToken'); 
+            
+            setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+            setAtualiza(atualiza + 1)
+        }).catch(function(error) {
+            alert(`Falha no token de acesso aos dados da equipe`);
+            Router.push({
+                pathname: '/',        
+            })      
+        })
+    }
+
     return (
         <div>
            <Menubar />

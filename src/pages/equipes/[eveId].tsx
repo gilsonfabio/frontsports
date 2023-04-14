@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import api from "../api/api";
+import {api} from "../../services/api";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies';
+
 import Menubar from "../../components/Menubar";
 import moment from "moment";
 
@@ -19,17 +21,75 @@ const Equipes = () => {
 
     const {query: { eveId }, } = router;
 
+    const [saving, setSaving] = useState(0);
+    const [atualiza, setAtualiza] = useState(0);
+   
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
     useEffect(() => {    
         setIdEvento(eveId);
-        api.get(`/equEvento/${idEve}`).then(response => {
-            setEquipes(response.data);
-        })   
-        api.get(`/dadEvento/${idEve}`).then(resp => {
+
+        api({
+          method: 'get',    
+          url: `equEvento/${idEve}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(resp) {
+          setEquipes(resp.data);
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        })    
+
+        api({
+          method: 'get',    
+          url: `dadEvento/${idEve}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(resp) {
           setEvento(resp.data);
           setDesEvento(resp.data[0].eveDescricao);
-          setDatLimite(resp.data[0].eveDatFinal);            
-        })   
-    }, [])
+          setDatLimite(resp.data[0].eveDatFinal); 
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        }) 
+    }, [atualiza])
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          setAtualiza(atualiza + 1 )
+      }).catch(function(error) {
+          alert(`Falha no token de acesso das equipes!`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
+    }
 
     function verifDatLimite(){
       let datWork = new Date() as any;
@@ -42,7 +102,7 @@ const Equipes = () => {
           alert(`Data atual é superior a data limite para inscrição de equipes. ${eveId}`);        
         }else {
           Router.push({
-            pathname: `/SignEquipe/:${eveId}`,
+            pathname: `/SignEquipe/${eveId}`,
           })
         }
       }catch (err) {
@@ -67,7 +127,7 @@ const Equipes = () => {
             <div className='flex flex-col w-full h-full text-black mt-5'>
               <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 ml-1 px-0 py-0 ">            
                 {equipes.map((item:any, idx) => {
-                  return <Link key={idx} href={`/SignInTec/${item.equId}`}>
+                  return <Link key={idx} href={`/EquDetalhes/${item.equId}`}>
                     <a className="bg-[#d7dddc]/20 rounded overflow-hidden shadow-lg mb-1 hover:bg-[#b5b9b9]/40" > 
                       <div className="flex flex-row items-start justify-between px-2">
                         <div className="flex flex-col items-start px-2 py-1 ">

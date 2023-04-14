@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import api from "../pages/api/api";
+import {api} from "../services/api";
 import Link from "next/link";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
 interface tecnicosProps {
     tecNome: string; 
@@ -15,12 +17,59 @@ interface tecnicosProps {
 const SearchTecnicos = () => {
     const [tecnicos, setTecnicos] = useState<Array<tecnicosProps>>([]);
     
-    useEffect(() => {   
-        api.get(`/tecnicos`).then(response => {
+    const [atualiza, setAtualiza] = useState(0);
+    const router = useRouter();
+    
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
+    useEffect(() => {  
+        api({
+            method: 'get',    
+            url: `tecnicos`,
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(response) {
             setTecnicos(response.data);
+        }).catch(function(error) {  
+            handleRefreshToken()                 
+        })
+    }, [atualiza])
+
+    async function handleRefreshToken(){
+        await api({
+            method: 'post',    
+            url: `refreshToken`,
+            data: {
+                idUsr,                            
+            },
+            headers: {
+                "x-access-token" : refreshToken    
+            },      
+        }).then(function(response) {
+            destroyCookie({}, 'nextauth.token');
+            destroyCookie({}, 'nextauth.usrId');
+            destroyCookie({}, 'nextauth.usrNome');
+            destroyCookie({}, 'nextauth.usrNivAcesso');
+            destroyCookie({}, 'nextauth.refreshToken'); 
             
-        })    
-    }, [])
+            setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+            setAtualiza(atualiza + 1 )
+        }).catch(function(error) {
+            alert(`Falha no token de acesso dos técnicos!`);
+            Router.push({
+                pathname: '/',        
+            })      
+        })
+    }
 
     return (
         <div className="mb-32 h-auto">

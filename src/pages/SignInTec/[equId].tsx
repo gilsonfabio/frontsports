@@ -1,7 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
-import api from '../api/api';
+
+import { api } from "../../services/api";
+
 import Link from 'next/link';
 
 const SignUpForm = () => {
@@ -32,7 +34,7 @@ const SignUpForm = () => {
         let idUsuario = response.data.tecId;
         let nomUsuario = response.data.tecNome;
         
-        if(idUsuario == equId) {
+        if(idUsuario == tecId) {
           Router.push({
             pathname: '/EquDetalhes',
               query: { id: `${idEqu}`}

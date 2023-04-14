@@ -1,13 +1,9 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
-//import { GetServerSideProps } from 'next';
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from './api/api';
-
-//interface apiProps {
-//  modalidades: any;
-//}
+import { api } from "../services/api";
 
 interface modalidadesProps {
   modId: number;
@@ -18,47 +14,96 @@ const CadEvento = () => {
     const router = useRouter();
 
     const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
-    const [eveModalidade, setIdModalidade] = useState(''); 
+    const [eveIdModalidade, setIdModalidade] = useState(''); 
     const [eveDescricao, setDescricao] = useState('');
     const [eveAno, setAno] = useState('');
     const [eveDatInicial, setDatInicial] = useState('');
     const [eveDatFinal, setDatFinal] = useState('');
     const [eveNroEquipes, setNroEquipes] = useState('');
     const [eveGenero, setGenero] = useState('');
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
 
-    useEffect(() => {    
-      api.get(`/modalidades`).then(response => {
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+
+    useEffect(() => {  
+      api({
+        method: 'get',    
+        url: `modalJWT`,
+        headers: {
+            "x-access-token" : token    
+        },      
+      }).then(function(response) {
         setModalidades(response.data);
-      })       
-    }, [])
+      }).catch(function(error) {  
+        handleRefreshToken()                 
+      })      
+    }, [atualiza])
 
     async function handleCadastra(e:any){      
         e.preventDefault();
-        //let datInicio = eveDatInicial.substring(6,10) + '-' + eveDatInicial.substring(3,5) + '-' + eveDatInicial.substring(0,2);
-        //setDatInicial(datInicio);
-        console.log('Data Inicio:', eveDatInicial);
-        
-        //let datFinal = eveDatFinal.substring(6,10) + '-' + eveDatFinal.substring(3,5) + '-' + eveDatFinal.substring(0,2);
-        //setDatFinal(datFinal);
-        console.log('Data Final:', eveDatFinal);
-        try {
-            api.post('/newevento', {
-                eveModalidade, 
-                eveDescricao, 
-                eveAno, 
-                eveDatInicial, 
-                eveDatFinal, 
-                eveNroEquipes, 
-                eveGenero, 
-            }).then(() => {
-                alert('Evento cadastrado com sucesso!')
-            }).catch(() => {
-                alert('Erro no cadastro!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha na confirmação do Evento!');
-        }  
+
+        api({
+          method: 'post',    
+          url: `newevento`,
+          data: {
+            eveIdModalidade, 
+            eveDescricao, 
+            eveAno, 
+            eveDatInicial, 
+            eveDatFinal, 
+            eveNroEquipes, 
+            eveGenero,                            
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+      }).then(function(response) {
+          alert('Evento cadastrado com sucesso!')
+          Router.back()
+      }).catch(function(error) {
+          setSaving(saving + 1 )
+          handleRefreshToken()          
+      })
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          
+          if(saving === 1) {
+            handleCadastra
+          }else {
+            setAtualiza(atualiza + 1 )
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso das modalidades`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
+
     }
 
     return (
@@ -143,7 +188,7 @@ const CadEvento = () => {
                       </div>
                       <div className='mb-4'> 
                         <select className="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example" 
-                          value={eveModalidade}
+                          value={eveIdModalidade}
                           onChange={(e) => {setIdModalidade(e.target.value)}} 
                         >
                           <option selected>Selecione a Modalidade desejada</option>

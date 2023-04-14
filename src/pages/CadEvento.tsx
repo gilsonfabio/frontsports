@@ -2,12 +2,12 @@ import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
 
-import api from './api/api';
+import {api} from "../services/api";
 
 const CadEvento = () => {
     const router = useRouter();
 
-    const [eveModalidade, setModalidade] = useState(router.query.id); 
+    const [eveIdModalidade, setModalidade] = useState(router.query.id); 
     const [eveDescricao, setDescricao] = useState('');
     const [eveAno, setAno] = useState('');
     const [eveDatInicial, setDatInicial] = useState('');
@@ -30,7 +30,7 @@ const CadEvento = () => {
         console.log('Data Final:', eveDatFinal);
         try {
             api.post('newevento', {
-                eveModalidade, 
+                eveIdModalidade, 
                 eveDescricao, 
                 eveAno, 
                 eveDatInicial, 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import api from "../api/api";
+import {api} from "../../services/api";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import Menubar from "../../components/Menubar";
 import moment from 'moment';
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies';
 
 interface eventosProps {
     eveId: number;
@@ -18,22 +19,76 @@ const ModDetalhes = () => {
     const [desModalidade, setDesModalidade] = useState('');
 
     const {query: { modId }, } = router
+    
+    const [saving, setSaving] = useState(0);
+    const [atualiza, setAtualiza] = useState(0);
+   
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     useEffect(() => {    
     
         setIdModal(modId);
   
-        api.get(`/eveModal/${idMod}`).then(response => {
-            setEventos(response.data);
+        api({
+          method: 'get',    
+          url: `eveModal/${idMod}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setEventos(response.data);
+        }).catch(function(error) {  
+          handleRefreshToken()                 
         })   
 
-        api.get(`/dadModalidade/${modId}`).then(resp => {
+        api({
+          method: 'get',    
+          url: `dadModalidade/${modId}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(resp) {
           setModalidade(resp.data);        
           setDesModalidade(resp.data[0].modDescricao);
-        })        
-             
-    }, [])
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        })   
+    }, [atualiza])
 
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          setAtualiza(atualiza + 1)
+      }).catch(function(error) {
+          alert(`Falha no token de acesso aos eventos`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
+    }
 
     return (
       <div className="w-screen h-screen bg-white">
@@ -42,12 +97,7 @@ const ModDetalhes = () => {
           <div className="flex flex-row justify-between items-center border-b-2 border-gray-300">
             <span className="text-md md:text-2xl font-bold text-green-600 mt-6 h-10" >
               Eventos da Modalidade: {desModalidade}
-            </span>
-            <Link href={`/SignInAdm/${modId}`} > 
-              <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-[10px] md:text-[14px] border bottom-1 border-green-600 rounded-full w-24 h-8 md:w-40 md:h-10">
-                Adicionar Evento
-              </a>  
-            </Link>
+            </span>            
           </div>  
             <div className='flex flex-col w-full h-full text-black mt-5'>
               <div className="grid grid-cols-1 gap-1 md:grid-cols-3 md:gap-4 mb-5 ml-1 px-0 py-0 ">            

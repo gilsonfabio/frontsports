@@ -4,7 +4,7 @@ import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
 import {api} from "../services/api";
 
-const ForgotPassword = () => {
+const ForgotPassTec = () => {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -23,12 +23,12 @@ const ForgotPassword = () => {
 
       api({
         method: 'put',    
-        url: `solPassword/${email}`,    
+        url: `solPassTec/${email}`,    
       }).then(function(response) {
         let idUsuario = response.data.usrId;
         let nomUsuario = response.data.usrNome;
         Router.push({
-          pathname: '/AltAdmPassword',
+          pathname: '/AltTecPassword',
             query: { id: `${idUsuario}`, name: `${nomUsuario}`}
           })
       }).catch(function(error) {
@@ -85,4 +85,4 @@ const ForgotPassword = () => {
     </section>
     );
 };
-export default ForgotPassword;
+export default ForgotPassTec;

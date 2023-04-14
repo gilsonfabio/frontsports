@@ -1,12 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from './api/api';
+import {api} from "../services/api";
 
 const CadTecnico = () => {
-    const router = useRouter();
-
     const [nome, setTecNome] = useState(''); 
     const [email, setTecEmail] = useState('');
     const [password, setTecPassword] = useState('');
@@ -14,28 +12,77 @@ const CadTecnico = () => {
     const [cpf, setTecCpf] = useState('');
     const [nascimento, setTecNascimento] = useState('');
 
-     const {query: { id }, } = router;
+    const [saving, setSaving] = useState(0);
+    const [atualiza, setAtualiza] = useState(0);
+    const router = useRouter();
+    
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
+    const {query: { id }, } = router;
 
     async function handleCadastra(e:any){      
         e.preventDefault();
-        console.log(nascimento)
-        try {
-            api.post('newtecnico', {
-                nome, 
-                cpf, 
-                nascimento, 
-                email, 
-                celular, 
-                password
-            }).then(() => {
-                alert('Técnico cadastrado com sucesso!')
-            }).catch(() => {
-                alert('Erro no cadastro!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha no Cadastro de Técnico!');
-        }  
+        api({
+          method: 'post',    
+          url: `newtecnico`,
+          data: {
+            nome, 
+            cpf, 
+            nascimento, 
+            email, 
+            celular, 
+            password                          
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          alert('Técnico cadastrado com sucesso!')
+          Router.back()
+        }).catch(function(error) {
+          setSaving(saving + 1 )
+          handleRefreshToken()          
+        })
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          
+          if(saving === 1) {
+            handleCadastra
+          }else {
+            setAtualiza(atualiza + 1 )
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso dos técnicos`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

@@ -2,9 +2,10 @@ import React, {useState, useEffect} from 'react';
 import Header from '../components/Header';
 import Menubar from '../components/Menubar';
 import Link from "next/link";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from "./api/api";
-import { RecordWithTtl } from 'dns';
+import { api } from "../services/api";
 
 interface eventosProps {
     eveId: number;
@@ -18,30 +19,80 @@ interface equipesProps {
 const AdmEquipes = () => {
     const [eventos, setEventos] = useState<Array<eventosProps>>([]);
     const [equipes, setEquipes] = useState<Array<equipesProps>>([]);
-    const [atualiza, setAtualiza] = useState(0);
     const [idEve, setIdEvento] = useState(0);
+
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    
+    const router = useRouter();
 
     const id = 0 ;
     useEffect(() => {   
-        api.get(`/eventos`).then(resp => {
-            setEventos(resp.data);            
+        api({
+            method: 'get',    
+            url: `eventos`,
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(resp) {
+            setEventos(resp.data);
+        }).catch(function(error) {  
+            handleRefreshToken()                 
         })    
-        api.get(`/admEquipes/${idEve}`).then(response => {
-            setEquipes(response.data);
-        })
-    }, [idEve])
 
-    //useEffect(() => {   
-    //    api.get(`/equEvento/${idEve}`).then(response => {
-    //       setEventos(response.data);            
-    //   })    
-    //}, [idEve])
+        api({
+            method: 'get',    
+            url: `admEquipes/${idEve}`,
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(response) {
+            setEquipes(response.data);
+        }).catch(function(error) {  
+            handleRefreshToken()                 
+        }) 
+
+    }, [idEve])
 
     function handleSelectEvento(id:any) {
         setIdEvento(id);
         setAtualiza(atualiza + 1);
+    }
 
-        //console.log('Evento:',idEve)
+    async function handleRefreshToken(){
+        await api({
+            method: 'post',    
+            url: `refreshToken`,
+            data: {
+                idUsr,                            
+            },
+            headers: {
+                "x-access-token" : refreshToken    
+            },      
+        }).then(function(response) {
+            destroyCookie({}, 'nextauth.token');
+            destroyCookie({}, 'nextauth.usrId');
+            destroyCookie({}, 'nextauth.usrNome');
+            destroyCookie({}, 'nextauth.usrNivAcesso');
+            destroyCookie({}, 'nextauth.refreshToken'); 
+            
+            setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+            setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+            setAtualiza(atualiza + 1 )
+        }).catch(function(error) {
+            alert(`Falha no token de acesso dos eventos`);
+            Router.push({
+                pathname: '/',        
+            })      
+        })
+
     }
 
     return (
@@ -60,9 +111,9 @@ const AdmEquipes = () => {
                         </div>
                         <div className="p-2 grid grid-cols-1 gap-1">  
                             {eventos.map((row) => (  
-                                <div key={row.eveId} className="items-center justify-center h-10 rounded overflow-hidden shadow-2xl mb-5 w-full " >                               
+                                <div key={row.eveId} className="items-center justify-center h-12 rounded overflow-hidden shadow-2xl mb-5 w-full " >                               
                                     <button onClick={() => handleSelectEvento(row.eveId)}>
-                                        <div className="flex flex-row items-center justify-start text-gray-700 text-[12px] font-bold" >{row.eveDescricao}</div>
+                                        <div className="flex flex-row items-center justify-start text-gray-700 text-[8px] font-bold" >{row.eveDescricao}</div>
                                     </button>     
                                 </div>                                                             
                             ))}

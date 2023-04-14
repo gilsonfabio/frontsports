@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from './api/api';
+import { api } from "../services/api";
 
 const NewEquipe = () => {
     const router = useRouter();
@@ -13,29 +13,77 @@ const NewEquipe = () => {
     const [equResp, setResponsavel] = useState('');
     const [equTecnico, setTecnico] = useState(router.query.id);
     const [equDirigente, setDirigente] = useState('');
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
 
-    const {query: { id }, } = router;
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+
+    const {query: { id } } = router;
+    const {query: { idEvento } } = router;
 
     async function handleCadastra(e:any){      
         e.preventDefault();
+        
+        api({
+          method: 'post',    
+          url: `newequipe`,
+          data: {
+            equDescricao,
+            equIdEvento, 
+            equRegiao, 
+            equResp, 
+            equTecnico, 
+            equDirigente,                            
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+      }).then(function(response) {
+          alert('Equipe cadastrada com sucesso!')
+          Router.back()
+      }).catch(function(error) {
+          setSaving(saving + 1 )
+          handleRefreshToken()          
+      })
 
-        try {
-            api.post('newevento', {
-                equDescricao,
-                equIdEvento, 
-                equRegiao, 
-                equResp, 
-                equTecnico, 
-                equDirigente, 
-            }).then(() => {
-                alert('Equipe cadastrada com sucesso!')
-            }).catch(() => {
-                alert('Erro no cadastro!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha no Cadastro de Equipes!');
-        }  
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          
+          if(saving === 1) {
+            handleCadastra
+          }else {
+            setAtualiza(atualiza + 1 )
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso das equipes`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

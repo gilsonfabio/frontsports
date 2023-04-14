@@ -6,12 +6,16 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-*/ 
+*/
 
 // next.config.js
 
 
 module.exports = {
+  basePath: process.env.BASE_PATH,
+  serverRuntimeConfig: {
+    API_URL: process.env.API_URL
+  },
   reactStrictMode: true,
   async headers() {
     return [
@@ -22,7 +26,7 @@ module.exports = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-          { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-access-token" },
+          { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
         ]
       }
     ]

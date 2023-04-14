@@ -44,20 +44,15 @@ const Slideshow = () => {
 		),
 	};
 	return (
-		<div className="w-screen h-144 m-0">			
+		<div className="w-full h-screen m-0">			
 			<Zoom {...zoomInProperties}>
     		    {images.map((each, index) => (
-				    <div key={index} className="flex  w-full ">
+				    <div key={index} className="flex w-full">
 					    <img
-						    className="w-full h-144 object-cover shadow-xl"
+						    className="w-auto h-screen object-cover shadow-xl"
 						    src={each}
 					    />
-						<span className="font-serif flex flex-auto absolute text-white text-4xl md:text-6xl mt-28 md:ml-32 items-center p-2 md:items-start justify-start">
-							SECRETARIA DE ESPORTE, 
-						</span>
-						<span className="font-serif flex flex-auto absolute text-white text-4xl md:text-6xl mt-56 md:mt-48 md:ml-32 items-center p-2 md:items-start justify-start">
-							LAZER E JUVENTUDE
-						</span>
+						
 				    </div>
 			    ))}
 			</Zoom>

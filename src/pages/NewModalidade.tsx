@@ -1,27 +1,66 @@
 import React, {useState}  from 'react';
 import Router from 'next/router';
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from './api/api';
-
+import { api } from "../services/api";
 
 const NewModalidade = () => {
     const [modDescricao, setDescricao] = useState('');
+    
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     async function handleCadastra(e:any){      
         e.preventDefault();
 
-        try {
-            api.post('newmodalidade', {
-                modDescricao,
-            }).then(() => {
-                alert('Modalidade cadastrada com sucesso!')
-            }).catch(() => {
-                alert('Erro no cadastro!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha no Cadastro de Modalidade!');
-        }  
+        api({
+            method: 'post',    
+            url: `newmodalidade`,
+            data: {
+              modDescricao,                            
+            },
+            headers: {
+                "x-access-token" : token    
+            },      
+        }).then(function(response) {
+            alert('Modalidade cadastrada com sucesso!')
+        }).catch(function(error) {
+            handleRefreshToken()          
+        })
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          handleCadastra
+      }).catch(function(error) {
+          alert(`Falha no token de cadastro de modalidades`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

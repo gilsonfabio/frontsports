@@ -1,14 +1,13 @@
-import type { AppProps } from 'next/app'
-import { ThemeProvider } from 'next-themes'
-import '../styles/globals.css'
+import 'tailwindcss/tailwind.css'
 
-function MyApp({ Component, pageProps }: AppProps) {
-  const AnyComponent = Component as any;
+import { AuthProvider } from '../contexts/AuthContext'
+
+function MyApp({ Component, pageProps }) {
   return (
-    <ThemeProvider attribute="class" >
-      <AnyComponent {...pageProps} />
-    </ThemeProvider>
-  ) 
+    <AuthProvider>
+      <Component {...pageProps} />
+    </AuthProvider>
+  )
 }
 
 export default MyApp

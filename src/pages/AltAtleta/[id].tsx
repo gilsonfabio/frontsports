@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from '../api/api';
+import { api } from "../../services/api";
 
 interface atletaProps {
     atlId: number;
@@ -37,13 +37,28 @@ const AltAtleta = () => {
     const [atlId, setIdAtleta] = useState(router.query.id);
     
     const {query: { id }, } = router;
+    
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
+
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     useEffect(() => {    
     
         setIdAtleta(id);
   
-        api.get(`/dadAtleta/${atlId}`).then(response => {
-            setNome(response.data[0].atlNome); 
+        api({
+          method: 'get',    
+          url: `dadAtleta/${atlId}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setNome(response.data[0].atlNome); 
             setNascimento(response.data[0].atlNascimento); 
             setCpf(response.data[0].atlCpf); 
             setIdentidade(response.data[0].atlIdentidade); 
@@ -53,37 +68,78 @@ const AltAtleta = () => {
             setNomPai(response.data[0].atlNomPai); 
             setNomMae(response.data[0].atlNomMae); 
             setEndereco(response.data[0].atlEndereco); 
-            setIdEquipe(response.data[0].atlIdEquipe);            
-        })            
-    }, [])
+            setIdEquipe(response.data[0].atlIdEquipe); 
+        }).catch(function(error) {           
+          handleRefreshToken()                 
+        })
+    }, [atualiza])
 
     async function handleAlteracao(e:any){      
         e.preventDefault();
         
         setIdAtleta(id);
 
-        try {
-            api.put(`updAtleta/${atlId}`, {
-                atlNome, 
-                atlNascimento, 
-                atlCpf, 
-                atlIdentidade, 
-                atlOrgEmissor, 
-                atlNatural, 
-                atlEstCivil, 
-                atlNomPai, 
-                atlNomMae, 
-                atlEndereco,
-                atlIdEquipe,
-            }).then(() => {
-                alert('Atleta alterado com sucesso!')
-            }).catch(() => {
-                alert('Erro na alteração!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha na alteração do atleta!');
-        }  
+        api({
+          method: 'put',    
+          url: `updAtleta/${atlId}`,
+          data: {
+            atlNome, 
+            atlNascimento, 
+            atlCpf, 
+            atlIdentidade, 
+            atlOrgEmissor, 
+            atlNatural, 
+            atlEstCivil, 
+            atlNomPai, 
+            atlNomMae, 
+            atlEndereco,
+            atlIdEquipe,                     
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          alert('Atleta alterado com sucesso!')
+          Router.back()
+        }).catch(function(error) {
+          setSaving(saving + 1)
+          handleRefreshToken()          
+        })
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          if (saving === 1){
+            handleAlteracao
+          }else {
+            setAtualiza(atualiza + 1)
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso a atletas!`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (

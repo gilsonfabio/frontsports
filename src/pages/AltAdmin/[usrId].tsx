@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
 
-import api from '../api/api';
+import { api } from "../../services/api";
 
 interface atletaProps {
     atlId: number;

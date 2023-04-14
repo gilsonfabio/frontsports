@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import Router from 'next/router';
-import { useRouter } from "next/router";
-import moment from "moment";
+import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
 
-import api from '../api/api';
+import { api } from "../../services/api";
 
 interface eventoProps {
     eveId: number;
@@ -25,7 +24,13 @@ const AltEvento = () => {
     const router = useRouter();
     const [evento, setEvento] = useState<Array<eventoProps>>([]);
 
-    const [eveModalidade, setEveModalidade] = useState(''); 
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
+
+    const [eveIdModalidade, setEveModalidade] = useState(''); 
     const [eveDescricao, setEveDescricao] = useState('');
     const [eveAno, setEveAno] = useState('');
     const [eveDatInicial, setEveDatInicial] = useState('');
@@ -33,6 +38,9 @@ const AltEvento = () => {
     const [eveNroEquipes, setEveNroEquipes] = useState('');
     const [eveGenero, setEveGenero] = useState('');
     const [desModalidade, setDesModalidade] = useState('');
+
+    const [atualiza, setAtualiza] = useState(0);
+    const [saving, setSaving] = useState(0);
     
     const [idEve, setIdEvento] = useState(router.query.eveId);
     const [modalidade, setModalidades] = useState<Array<modalidadesProps>>([]);
@@ -42,45 +50,98 @@ const AltEvento = () => {
     useEffect(() => {    
     
         setIdEvento(eveId);
-  
-        api.get(`/dadEvento/${idEve}`).then(response => {
-            setEveModalidade(response.data[0].equModalidade);
-            setEveDescricao(response.data[0].eveDescricao);
-            setEveAno(response.data[0].eveAno);
-            setEveDatInicial(response.data[0].eveDatInicial);
-            setEveDatFinal(response.data[0].eveDatFinal);
-            setEveNroEquipes(response.data[0].eveNroEquipes);
-            setEveGenero(response.data[0].eveGenero);
-            setDesModalidade(response.data[0].modDescricao);
-        })   
-        
-        api.get(`/modalidades`).then(response => {
-          setModalidades(response.data);
-        })
 
-    }, [])
+        api({
+          method: 'get',    
+          url: `dadEvento/${idEve}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setEveModalidade(response.data[0].eveIdModalidade);
+          setEveDescricao(response.data[0].eveDescricao);
+          setEveAno(response.data[0].eveAno);
+          setEveDatInicial(response.data[0].eveDatInicial);
+          setEveDatFinal(response.data[0].eveDatFinal);
+          setEveNroEquipes(response.data[0].eveNroEquipes);
+          setEveGenero(response.data[0].eveGenero);
+          setDesModalidade(response.data[0].modDescricao);
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        }) 
+        
+        api({
+          method: 'get',    
+          url: `modalJWT`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setModalidades(response.data);
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        }) 
+    }, [atualiza])
 
     async function handleAlterar(e:any){      
         e.preventDefault();
-               
-        try {
-          api.put(`updEvento/${idEve}`, {
-            eveModalidade, 
+        api({
+          method: 'put',    
+          url: `updEvento/${idEve}`,
+          data: {
+            eveIdModalidade, 
             eveDescricao,
             eveAno,
             eveDatInicial,
             eveDatFinal,
             eveNroEquipes,
-            eveGenero,    
-            }).then(() => {
-                alert('Evento alterado com sucesso!')
-            }).catch(() => {
-                alert('Erro na alteração!');
-            })  
-            Router.back();
-        }catch (err) {
-            alert('Falha na Alteração do Evento!');
-        }  
+            eveGenero,                               
+          },
+          headers: {
+              "x-access-token" : token    
+          },      
+      }).then(function(response) {
+          alert('Evento alterado com sucesso!')
+          Router.back()
+      }).catch(function(error) {
+          setSaving(saving + 1)
+          handleRefreshToken()          
+      }) 
+    }
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          if (saving === 1){
+            handleAlterar
+          }else {
+            setAtualiza(atualiza + 1)
+          }
+      }).catch(function(error) {
+          alert(`Falha no token de acesso aos eventos`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
     }
 
     return (
@@ -175,7 +236,7 @@ const AltEvento = () => {
                       </div>  
                       <div className='mb-4'> 
                         <select className="form-select appearance-none block w-full px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding bg-no-repeat border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" aria-label="Default select example" 
-                          value={eveModalidade}
+                          value={eveIdModalidade}
                           onChange={(e) => {setEveModalidade(e.target.value)}} 
                         >
                           <option selected>Selecione a Modalidade desejada</option>

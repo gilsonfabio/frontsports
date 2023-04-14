@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import api from "../pages/api/api";
+import {api} from "../services/api";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
+import { setCookie, parseCookies, destroyCookie } from 'nookies'
+
 import Menubar from "../components/Menubar";
 
 interface usuarioProps {
@@ -24,14 +26,18 @@ const UsrDetalhes = () => {
     const [usuario, setUsuario] = useState<Array<usuarioProps>>([]);
     const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
     const router = useRouter();
-    const [idUsr, setIdUsuario] = useState(router.query.usrId);
-   
-    const [nivAcesso, setNivAcesso] = useState(router.query.nivAce);
     const [nivLiberado, setNivLiberado] = useState('');
 
     const {query: { usrId } } = router;
     const {query: { nivAce } } = router;
 
+    const [atualiza, setAtualiza] = useState(0);
+    
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     function CadastraModalidade(e:any){
       Router.push({
@@ -41,22 +47,63 @@ const UsrDetalhes = () => {
     }
 
     useEffect(() => {    
-    
-        setIdUsuario(usrId);
-  
-        api.get(`/dadUsuario/${idUsr}`).then(response => {
-            setUsuario(response.data);
-            //setNivAcesso(response.data.usrNivAcesso);
-            setNivLiberado('9');
-        })
+      api({
+        method: 'get',    
+        url: `dadUsuario/${idUsr}`,
+        headers: {
+            "x-access-token" : token    
+        },      
+      }).then(function(response) {
+        setUsuario(response.data);
+      }).catch(function(error) {  
+        handleRefreshToken()                 
+      })
 
-        api.get(`/modUsuario/${idUsr}`).then(resp => {
-          setModalidades(resp.data);
-        })   
+      api({
+        method: 'get',    
+        url: `modUsuario/${idUsr}`,
+        headers: {
+            "x-access-token" : token    
+        },      
+      }).then(function(resp) {
+        setModalidades(resp.data);
+      }).catch(function(error) {  
+        handleRefreshToken()                 
+      })         
+    }, [atualiza])
+
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
           
-    }, [])
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          setAtualiza(atualiza + 1 )
+      }).catch(function(error) {
+          alert(`Falha no token de acesso aos administradores`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
+  }
 
-    return (
+  return (
         <div className="w-screen h-full bg-white">
           <Menubar />
           <div className="ml-2 mr-2 md:ml-36 md:mr-36">

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
-import api from '../api/api';
+import {api} from "../../services/api";
 
 const SignUpForm = () => {
     const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ const SignUpForm = () => {
     const [equipe, setEquipe] = useState([]);
     const [tecId, setIdTecnico] = useState('');
     const router = useRouter();
-    const [idEqu, setIdEquipe] = useState(router.query.eveId);
+    const [idEve, setIdEvento] = useState(router.query.eveId);
     const {query: { eveId }, } = router
 
     async function sendLogin(e:any){
@@ -19,15 +19,11 @@ const SignUpForm = () => {
         const response = await api.get(`loginTec/${email}/${password}`);
         let idUsuario = response.data.tecId;
         let nomUsuario = response.data.tecNome;
-        
-        if(idUsuario == eveId) {
-          Router.push({
-            pathname: '/NewEquipe',
-              query: { id: `${idUsuario}`, idEvento:`${eveId}`}
-            })
-        }else {
-          alert(`Técnico sem acesso a essa equipe! Favor verificar. ${tecId}`);
-        }
+        setIdEvento(router.query.eveId);
+        Router.push({
+          pathname: '/NewEquipe',
+            query: { id: `${idUsuario}`, idEvento:`${idEve}`}
+          })        
       }catch (err) {
           alert(`Falha no login técnico! Tente novamente. ${email}`);
         }             

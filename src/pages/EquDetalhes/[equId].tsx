@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { api } from "../services/api";
+import {api} from "../../services/api";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
-import Menubar from "../components/Menubar";
+import Menubar from "../../components/Menubar";
+import { setCookie, parseCookies, destroyCookie } from 'nookies';
 
 interface atletasProps {
   atlId: number;
@@ -32,31 +33,83 @@ const EquDetalhes = () => {
     const [atletas, setAtletas] = useState<Array<atletasProps>>([]);
     const [equipe, setEquipe] = useState<Array<equipesProps>>([]);
     const router = useRouter();
-    const [idEqu, setIdEquipe] = useState(router.query.id);
+    const [idEqu, setIdEquipe] = useState(router.query.equId);
     const [nomEquipe, setNomEquipe] = useState('');
     const [qtdAtletas, setQtdAtletas] = useState('');
     const [limAtletas, setLimAtletas] = useState('');
     
-    const {query: { id }, } = router
+    const {query: { equId }, } = router;
+
+    const [saving, setSaving] = useState(0);
+    const [atualiza, setAtualiza] = useState(0);
+   
+    const { 'nextauth.token': token } = parseCookies();
+    const { 'nextauth.refreshToken': refreshToken } = parseCookies();
+    const { 'nextauth.usrId': idUsr } = parseCookies();
+    const { 'nextauth.usrNome': nomUsr } = parseCookies();
+    const { 'nextauth.usrNivAcesso': nivAcesso } = parseCookies();
 
     useEffect(() => {    
     
-        setIdEquipe(id);
-  
-        api.get(`/dadEquipe/${idEqu}`).then(response => {
-            setEquipe(response.data);
-            setNomEquipe(response.data[0].equDescricao);
-            setQtdAtletas(response.data[0].qtd);
-            setLimAtletas(response.data[0].eveNroEquipes);
-            console.log(response.data)
-        })
+        setIdEquipe(equId);
+        api({
+          method: 'get',    
+          url: `dadEquipe/${idEqu}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(response) {
+          setEquipe(response.data);
+          setNomEquipe(response.data[0].equDescricao);
+          setQtdAtletas(response.data[0].qtd);
+          setLimAtletas(response.data[0].eveNroEquipes);
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        }) 
 
-        api.get(`/atlEquipe/${idEqu}`).then(resp => {
+        api({
+          method: 'get',    
+          url: `atlEquipe/${idEqu}`,
+          headers: {
+              "x-access-token" : token    
+          },      
+        }).then(function(resp) {
           setAtletas(resp.data);
-          console.log(resp.data)
-      })   
+        }).catch(function(error) {  
+          handleRefreshToken()                 
+        }) 
+    }, [atualiza])
 
-    }, [])
+    async function handleRefreshToken(){
+      await api({
+          method: 'post',    
+          url: `refreshToken`,
+          data: {
+              idUsr,                            
+          },
+          headers: {
+              "x-access-token" : refreshToken    
+          },      
+      }).then(function(response) {
+          destroyCookie({}, 'nextauth.token');
+          destroyCookie({}, 'nextauth.usrId');
+          destroyCookie({}, 'nextauth.usrNome');
+          destroyCookie({}, 'nextauth.usrNivAcesso');
+          destroyCookie({}, 'nextauth.refreshToken'); 
+          
+          setCookie(undefined, 'nextauth.token', response.data.token, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.refreshToken', response.data.refreshToken, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrId', response.data.user.usrId, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNome', response.data.user.usrNome, {maxAge: 60 * 60 * 1, })
+          setCookie(undefined, 'nextauth.usrNivAcesso', response.data.user.usrNivAcesso, {maxAge: 60 * 60 * 1, })                
+          setAtualiza(atualiza + 1 )
+      }).catch(function(error) {
+          alert(`Falha no token de acesso das equipes!`);
+          Router.push({
+              pathname: '/',        
+          })      
+      })
+    }
 
     return (
         <div className="w-screen h-full bg-white">
@@ -66,7 +119,7 @@ const EquDetalhes = () => {
               <span className="text-[14px] md:text-3xl font-bold text-green-600 mt-6 mb-6 " >
                 Equipe: {nomEquipe}
               </span>
-              <Link href={`/AltEquipe/${id}`} passHref > 
+              <Link href={`/AltEquipe/${equId}`} passHref > 
                 <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-xs md:text-sx border bottom-1 border-green-600 rounded-full w-28 h-8 md:w-40 md:h-10">
                   Alterar Equipe
                 </a>  

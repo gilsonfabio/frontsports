@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Router from 'next/router';
 import { useRouter } from "next/router";
-import api from './api/api';
+import {api} from "../services/api";
 
 const AltAdmPassword = () => {
     const [email, setEmail] = useState('');
@@ -14,20 +14,21 @@ const AltAdmPassword = () => {
 
     async function sendLogin(e:any){
         e.preventDefault();
-        try {
-          api.post('updAdmPassword', {
-              email, 
-              password, 
-              codSeguranca, 
-          }).then(() => {
-              alert('Administrador Atualizado com sucesso!')
-          }).catch(() => {
-              alert('Erro na atualização!');
-          })  
-          Router.back();
-      }catch (err) {
-          alert('Falha na atualização dos dados do Administrador!');
-      }  
+        api({
+          method: 'put',    
+          url: `updAdmPassword`,
+          data: {
+            email, 
+            password, 
+            codSeguranca,                           
+          },          
+        }).then(function(response) {
+          alert('Administrador(a) Atualizado com sucesso!')
+          Router.push({pathname: '/', }) 
+        }).catch(function(error) {
+          alert('Falha na atualização dos dados do Administrador(a)!');
+          Router.push({pathname: '/', })        
+        })
     }  
         
     return (
