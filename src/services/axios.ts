@@ -5,7 +5,7 @@ export function getAPIClient(ctx?: any) {
   const { 'nextauth.token': token } = parseCookies(ctx)
 
   const api = axios.create({
-    baseURL: 'https://backsports.herokuapp.com/'
+    baseURL: 'https://backsports.herokuapp.com'
   })
 
   api.interceptors.request.use(config => {
