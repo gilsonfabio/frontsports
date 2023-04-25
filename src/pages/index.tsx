@@ -1,11 +1,12 @@
 import Head from 'next/head'
 import { LockClosedIcon } from '@heroicons/react/solid'
 import { useForm } from 'react-hook-form'
-import { useContext, useState } from 'react';
+import React, { useContext, useState, useRef } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import Image from 'next/image';
 import Slideshow from '../components/SliderShow';
 import Link from 'next/link';
+import Webcam from "react-webcam";
 
 import {api} from '../services/api';
 
@@ -14,7 +15,22 @@ export default function Home() {
   const { signIn } = useContext(AuthContext)
 
   const [inform, setInform] = useState([]);
+  
+  const [imgSrc, setImgSrc] = React.useState(null);
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user"
+  };
 
+  const webcamRef = React.useRef(null);
+  const capture = React.useCallback(
+    () => {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setImgSrc(imageSrc);
+    },[webcamRef, setImgSrc]
+  );
+  
   async function handleSignIn(data) {
     await signIn(data)
   }
@@ -136,8 +152,20 @@ export default function Home() {
               <button onClick={handleTesteIP} >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                </svg>
+                </svg>                
               </button>
+              <Webcam
+                audio={false}
+                height={720}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                width={1280}
+                videoConstraints={videoConstraints}
+              />
+              <button onClick={capture}>Capture photo</button>
+              {imgSrc && (
+                <Image src={imgSrc} />
+              )}
             </div>                               
           </div>
         </form>
