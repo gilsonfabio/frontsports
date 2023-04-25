@@ -6,7 +6,6 @@ import { AuthContext } from '../contexts/AuthContext';
 import Image from 'next/image';
 import Slideshow from '../components/SliderShow';
 import Link from 'next/link';
-import Webcam from "react-webcam";
 
 import {api} from '../services/api';
 
@@ -145,7 +144,7 @@ export default function Home() {
                   Esqueceu sua senha Técnico?
                 </span>  
               </Link>
-            </div>                      
+            </div>                            
           </div>
           <div className="flex items-center justify-between">
             <div className="text-sm">
@@ -153,19 +152,7 @@ export default function Home() {
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                 </svg>                
-              </button>
-              <Webcam
-                audio={false}
-                height={720}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                width={1280}
-                videoConstraints={videoConstraints}
-              />
-              <button onClick={capture}>Capture photo</button>
-              {imgSrc && (
-                <Image src={imgSrc} />
-              )}
+              </button>              
             </div>                               
           </div>
         </form>
@@ -175,3 +162,19 @@ export default function Home() {
     </div>
   )
 }
+
+
+/*
+<Webcam
+  audio={false}
+  height={720}
+  ref={webcamRef}
+  screenshotFormat="image/jpeg"
+  width={1280}
+  videoConstraints={videoConstraints}
+/>
+<button onClick={capture}>Capture photo</button>
+  {imgSrc && (
+    <Image src={imgSrc} />
+  )}
+*/
