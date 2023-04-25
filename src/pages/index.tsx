@@ -1,20 +1,34 @@
 import Head from 'next/head'
 import { LockClosedIcon } from '@heroicons/react/solid'
 import { useForm } from 'react-hook-form'
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import Image from 'next/image';
 import Slideshow from '../components/SliderShow';
 import Link from 'next/link';
 
+import {api} from '../services/api';
+
 export default function Home() {
   const { register, handleSubmit } = useForm();
   const { signIn } = useContext(AuthContext)
 
+  const [inform, setInform] = useState([]);
+
   async function handleSignIn(data) {
     await signIn(data)
   }
-  //<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"></div>
+
+  function handleTesteIP() {
+    api.get("https://ipinfo.io/json")
+      .then(res => {
+      setInform(res.data)
+      console.log(res.data)   
+    }).catch((err) => {
+      console.error("ops! ocorreu um erro" + err);
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
@@ -116,6 +130,15 @@ export default function Home() {
                 </span>  
               </Link>
             </div>                      
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <button onClick={handleTesteIP} >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </button>
+            </div>                               
           </div>
         </form>
         </div>

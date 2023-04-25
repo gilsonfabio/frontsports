@@ -4,7 +4,7 @@ import { parseCookies } from "nookies";
 export function getAPIClient(ctx?: any) {
   const { 'nextauth.token': token } = parseCookies(ctx)
 
-  //baseURL: 'https://backsports.herokuapp.com'
+  //baseURL: 'https://apps.aparecida.go.gov.br/backend-gce'
   const api = axios.create({
     baseURL: 'https://backsports.herokuapp.com'
   })
