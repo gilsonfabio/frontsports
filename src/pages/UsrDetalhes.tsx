@@ -23,11 +23,15 @@ interface modalidadesProps {
 }
 
 const UsrDetalhes = () => {
+    const router = useRouter();
     const [usuario, setUsuario] = useState<Array<usuarioProps>>([]);
     const [modalidades, setModalidades] = useState<Array<modalidadesProps>>([]);
-    const router = useRouter();
+    const [idAdm, setIdAdmim] = useState(router.query.id)
+    const [user, setUser] = useState(router.query.usrId)
+
     const [nivLiberado, setNivLiberado] = useState('');
 
+    const {query: { id } } = router;
     const {query: { usrId } } = router;
     const {query: { nivAce } } = router;
 
@@ -42,14 +46,14 @@ const UsrDetalhes = () => {
     function CadastraModalidade(e:any){
       Router.push({
         pathname: '/CadModUsuario',
-        query: { id: `${idUsr}` }
+        query: { id: `${user}` }
       })        
     }
 
     useEffect(() => {    
       api({
         method: 'get',    
-        url: `dadUsuario/${idUsr}`,
+        url: `dadUsuario/${user}`,
         headers: {
             "x-access-token" : token    
         },      
@@ -61,7 +65,7 @@ const UsrDetalhes = () => {
 
       api({
         method: 'get',    
-        url: `modUsuario/${idUsr}`,
+        url: `modUsuario/${user}`,
         headers: {
             "x-access-token" : token    
         },      
@@ -111,7 +115,7 @@ const UsrDetalhes = () => {
               <span className="text-[14px] md:text-3xl font-bold text-green-600 mt-6 mb-6 " >
                 Usuario: 
               </span>
-              <Link href={`/AltAdmin/${usrId}`} passHref > 
+              <Link href={`/AltAdmin/${user}`} passHref > 
                 <a className="flex flex-row items-center justify-center text-green-600 hover:text-white hover:bg-green-600 text-xs md:text-sx border bottom-1 border-green-600 rounded-full w-28 h-8 md:w-40 md:h-10">
                   Alterar Usuário
                 </a>  

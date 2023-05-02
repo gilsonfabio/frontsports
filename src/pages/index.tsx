@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { LockClosedIcon } from '@heroicons/react/solid'
 import { useForm } from 'react-hook-form'
-import React, { useContext, useState, useRef } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import Image from 'next/image';
 import Slideshow from '../components/SliderShow';
@@ -9,9 +9,11 @@ import Link from 'next/link';
 
 import {api} from '../services/api';
 
-export default function Home() {
+const Home = () => {
   const { register, handleSubmit } = useForm();
   const { signIn } = useContext(AuthContext)
+  
+  const [res, setRes] = useState(1);
 
   const [inform, setInform] = useState([]);
   
@@ -29,6 +31,12 @@ export default function Home() {
       setImgSrc(imageSrc);
     },[webcamRef, setImgSrc]
   );
+
+  useEffect(() => {  
+    let min = Math.ceil(1);
+    let max = Math.floor(5);
+    setRes(Math.floor(Math.random() * (max - min + 1)) + min);
+  }, [])
   
   async function handleSignIn(data) {
     await signIn(data)
@@ -49,9 +57,9 @@ export default function Home() {
       <Head>
         <title>Home</title>
       </Head>
-      <div className="grid grid-cols-1 gap-1 md:grid-cols-2 min-h-screen">  
-      <div className='bg-gray-200'>
-        <Slideshow />
+      <div className="grid grid-cols-1 gap-1 md:grid-cols-2 min-h-screen ">  
+      <div className='bg-gray-200 max-h-screen '>
+        <video className="w-full h-screen object-cover" src={`/images/video00${res}.mp4`} autoPlay loop muted />    
       </div>
       <div className="bg-gray-100 flex flex-col items-center justify-center space-y-8">
         <div>          
@@ -163,6 +171,7 @@ export default function Home() {
   )
 }
 
+export default Home;
 
 /*
 <Webcam
